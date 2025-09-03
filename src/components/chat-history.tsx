@@ -8,7 +8,7 @@ import {
   SidebarMenuButton,
 } from './ui/sidebar';
 import { Button } from './ui/button';
-import type { Conversation } from '@/app/page';
+import type { Conversation } from '@/lib/types';
 
 interface ChatHistoryProps {
   conversations: Conversation[];
