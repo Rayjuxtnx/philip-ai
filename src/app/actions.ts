@@ -5,15 +5,22 @@ import { converse } from '@/ai/flows/basic-conversation';
 import { answerGeneralKnowledgeQuestion } from '@/ai/flows/general-knowledge-qa';
 import { generatePoliteUnknownResponse } from '@/ai/flows/polite-unknown-response';
 import { selectResponseTool } from '@/ai/flows/response-tool-selection';
+import { analyzeImage } from '@/ai/flows/image-analysis';
 
 const AVAILABLE_TOOLS = {
   CONVERSE: 'converse',
   QA: 'answerGeneralKnowledgeQuestion',
+  ANALYZE_IMAGE: 'analyzeImage',
 };
 
-export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts: string }[], newMessage: string): Promise<string> {
+export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts: string }[], newMessage: string, imageUrl?: string): Promise<string> {
   const userInput = newMessage;
   try {
+    if (imageUrl) {
+      const response = await analyzeImage({ image: imageUrl, question: userInput });
+      return response.analysis;
+    }
+
     const { selectedTool } = await selectResponseTool({
       userInput,
       availableTools: Object.values(AVAILABLE_TOOLS),

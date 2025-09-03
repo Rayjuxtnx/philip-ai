@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useRef, useEffect, type FormEvent } from 'react';
-import { Bot, SendHorizontal, User } from 'lucide-react';
+import { Bot, Paperclip, SendHorizontal, User, X } from 'lucide-react';
+import Image from 'next/image';
 
 import { getAiResponse } from '@/app/actions';
 import { Input } from '@/components/ui/input';
@@ -26,8 +27,10 @@ interface ChatInterfaceProps {
 
 export default function ChatInterface({ messages, setMessages }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
+  const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const scrollToBottom = () => {
@@ -40,18 +43,31 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
     scrollToBottom();
   }, [messages]);
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && !image) || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: input,
+      imageUrl: image || undefined,
     };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput('');
+    setImage(null);
     setIsLoading(true);
 
     try {
@@ -60,7 +76,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
         parts: m.content
       }));
 
-      const response = await getAiResponse(chatHistory, userMessage.content);
+      const response = await getAiResponse(chatHistory, userMessage.content, userMessage.imageUrl);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'model',
@@ -108,6 +124,15 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                     {message.role === 'user' ? 'You' : 'Chatty Companion'}
                   </p>
                   <div className={cn("prose prose-invert max-w-none text-foreground rounded-lg p-3 text-left", message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card')}>
+                    {message.imageUrl && (
+                      <Image
+                        src={message.imageUrl}
+                        alt="User uploaded content"
+                        width={400}
+                        height={300}
+                        className="rounded-md my-2"
+                      />
+                    )}
                     {message.content}
                   </div>
                 </div>
@@ -138,7 +163,43 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
           </div>
       </div>
       <div className="p-4 md:p-6 bg-background/75 border-t">
+        {image && (
+          <div className="relative mb-2 w-32">
+            <Image
+              src={image}
+              alt="Preview"
+              width={128}
+              height={128}
+              className="rounded-md"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-1 right-1 h-6 w-6 bg-black/50 hover:bg-black/75"
+              onClick={() => setImage(null)}
+            >
+              <X className="h-4 w-4 text-white" />
+            </Button>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="flex w-full max-w-4xl mx-auto items-center space-x-2">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+            className="hidden"
+            accept="image/*"
+          />
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isLoading}
+          >
+            <Paperclip className="h-5 w-5" />
+            <span className="sr-only">Attach image</span>
+          </Button>
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
