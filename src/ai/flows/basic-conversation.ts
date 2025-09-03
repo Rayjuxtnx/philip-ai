@@ -12,6 +12,10 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const ConverseInputSchema = z.object({
+  chatHistory: z.array(z.object({
+    role: z.enum(['user', 'model']),
+    parts: z.string(),
+  })).describe('The history of the conversation.'),
   userInput: z.string().describe('The user input to respond to.'),
 });
 export type ConverseInput = z.infer<typeof ConverseInputSchema>;
@@ -31,7 +35,12 @@ const conversePrompt = ai.definePrompt({
   output: {schema: ConverseOutputSchema},
   prompt: `You are a friendly and helpful chatbot engaging in a conversation with a user. Use emojis to make the conversation more engaging.
 
-  Respond to the following user input in a natural and conversational manner:
+  Here is the conversation history:
+  {{#each chatHistory}}
+  {{role}}: {{parts}}
+  {{/each}}
+
+  Continue the conversation by responding to the following user input in a natural and conversational manner:
   {{{userInput}}}
   `,
 });

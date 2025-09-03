@@ -19,13 +19,15 @@ export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts
       availableTools: Object.values(AVAILABLE_TOOLS),
     });
 
+    const conversationHistory = chatHistory.slice(0, -1);
+
     switch (selectedTool) {
       case AVAILABLE_TOOLS.CONVERSE:
-        const conversationResponse = await converse({ userInput });
+        const conversationResponse = await converse({ userInput, chatHistory: conversationHistory });
         return conversationResponse.response;
 
       case AVAILABLE_TOOLS.QA:
-        const qaResponse = await answerGeneralKnowledgeQuestion({ question: userInput });
+        const qaResponse = await answerGeneralKnowledgeQuestion({ question: userInput, chatHistory: conversationHistory });
         return qaResponse.answer;
 
       default:
