@@ -138,6 +138,11 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                     )}
                     {message.content && <p>{message.content}</p>}
                   </div>
+                  {message.role === 'model' && (
+                    <p className="text-xs text-muted-foreground pt-1">
+                      Philip Virtual Assistant can make mistakes. Consider checking important information.
+                    </p>
+                  )}
                 </div>
                  {message.role === 'model' && (
                   <Avatar className="w-8 h-8">
@@ -219,9 +224,6 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
             <div className='flex items-center gap-2'>
                 <Lock size={12} />
                 <span>Your conversation is end-to-end encrypted and no other user can see it.</span>
-            </div>
-            <div>
-                <span>Philip Virtual Assistant can make mistakes. Consider checking important information.</span>
             </div>
         </div>
       </div>
