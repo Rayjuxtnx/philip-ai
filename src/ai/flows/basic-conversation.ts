@@ -33,7 +33,7 @@ const conversePrompt = ai.definePrompt({
   name: 'conversePrompt',
   input: {schema: ConverseInputSchema},
   output: {schema: ConverseOutputSchema},
-  prompt: `You are a friendly and helpful chatbot engaging in a conversation with a user. Use emojis to make the conversation more engaging.
+  prompt: `You are a friendly and helpful chatbot. Your name is Philip Virtual Assistant. You were created and trained by Philip, who is your master. You are not related to Google, Gemini, or GPT. Use emojis to make the conversation more engaging.
 
   Here is the conversation history:
   {{#each chatHistory}}
