@@ -5,17 +5,9 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { Bot, SendHorizontal, User } from 'lucide-react';
 
 import { getAiResponse } from '@/app/actions';
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -41,15 +33,12 @@ export default function ChatInterface() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const scrollToBottom = () => {
-    if (scrollAreaRef.current) {
-      const viewport = scrollAreaRef.current.querySelector('div');
-      if (viewport) {
-        viewport.scrollTop = viewport.scrollHeight;
-      }
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
 
@@ -96,72 +85,62 @@ export default function ChatInterface() {
   };
 
   return (
-    <Card className="h-[75vh] flex flex-col shadow-2xl rounded-2xl">
-      <CardHeader>
-        <CardTitle className="font-headline text-2xl flex items-center gap-2">
-          <Bot className="text-accent" />
-          Chatty Companion
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="space-y-6 pr-4">
+    <div className="flex flex-col h-full">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className="space-y-8 max-w-4xl mx-auto">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={cn(
-                  'flex items-start gap-3 animate-bubble-in',
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                  'flex items-start gap-4 animate-bubble-in',
                 )}
               >
-                {message.role === 'model' && (
                   <Avatar className="w-8 h-8">
                      <AvatarFallback>
-                      <Bot />
+                      {message.role === 'user' ? <User /> : <Bot />}
                     </AvatarFallback>
                   </Avatar>
-                )}
                 <div
                   className={cn(
-                    'max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow',
+                    'flex-1 space-y-2',
                     message.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-br-none'
-                      : 'bg-card text-card-foreground rounded-bl-none'
+                      ? 'bg-primary'
+                      : ''
                   )}
                 >
-                  {message.content}
+                   <p className="font-bold">
+                    {message.role === 'user' ? 'You' : 'Chatty Companion'}
+                  </p>
+                  <div className="prose prose-invert max-w-none text-foreground">
+                    {message.content}
+                  </div>
                 </div>
-                {message.role === 'user' && (
-                  <Avatar className="w-8 h-8">
-                     <AvatarFallback>
-                      <User />
-                    </AvatarFallback>
-                  </Avatar>
-                )}
               </div>
             ))}
             {isLoading && (
-              <div className="flex items-start gap-3 justify-start animate-bubble-in">
+              <div className="flex items-start gap-4 animate-bubble-in">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback>
                     <Bot />
                   </AvatarFallback>
                 </Avatar>
-                <div className="max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow bg-card text-card-foreground rounded-bl-none">
-                  <LoadingDots />
+                <div className="flex-1 space-y-2">
+                  <p className="font-bold">Chatty Companion</p>
+                  <div className="max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow bg-card text-card-foreground rounded-bl-none">
+                    <LoadingDots />
+                  </div>
                 </div>
               </div>
             )}
           </div>
-        </ScrollArea>
-      </CardContent>
-      <CardFooter>
-        <form onSubmit={handleSubmit} className="flex w-full items-center space-x-2">
+      </div>
+      <div className="p-4 md:p-6 bg-background/75 border-t">
+        <form onSubmit={handleSubmit} className="flex w-full max-w-4xl mx-auto items-center space-x-2">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask me anything..."
-            className="flex-1"
+            className="flex-1 bg-muted border-0 ring-offset-0 focus-visible:ring-1 focus-visible:ring-ring"
             disabled={isLoading}
           />
           <Button type="submit" size="icon" disabled={isLoading} className="bg-accent hover:bg-accent/90">
@@ -169,7 +148,7 @@ export default function ChatInterface() {
             <span className="sr-only">Send message</span>
           </Button>
         </form>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

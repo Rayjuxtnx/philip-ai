@@ -49,19 +49,19 @@ body {
     --card-foreground: 210 20% 98%;
     --popover: 224 71% 4%;
     --popover-foreground: 210 20% 98%;
-    --primary: 190 40% 65%;
-    --primary-foreground: 224 71.4% 4.1%;
+    --primary: 215 28% 17%;
+    --primary-foreground: 210 20% 98%;
     --secondary: 215 28% 17%;
     --secondary-foreground: 210 20% 98%;
     --muted: 215 28% 17%;
     --muted-foreground: 215 20% 65%;
-    --accent: 157 55% 52%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 215 28% 17%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 215 28% 17%;
     --input: 215 28% 17%;
-    --ring: 190 40% 65%;
+    --ring: 215 28% 17%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -93,8 +93,8 @@ body {
     width: 6px;
     height: 6px;
     border-radius: 5px;
-    background-color: hsl(var(--primary-foreground));
-    color: hsl(var(--primary-foreground));
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--foreground));
     animation: dot-flashing 1s infinite linear alternate;
     animation-delay: 0.5s;
   }
@@ -110,8 +110,8 @@ body {
     width: 6px;
     height: 6px;
     border-radius: 5px;
-    background-color: hsl(var(--primary-foreground));
-    color: hsl(var(--primary-foreground));
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--foreground));
     animation: dot-flashing 1s infinite alternate;
     animation-delay: 0s;
   }
@@ -120,18 +120,18 @@ body {
     width: 6px;
     height: 6px;
     border-radius: 5px;
-    background-color: hsl(var(--primary-foreground));
-    color: hsl(var(--primary-foreground));
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--foreground));
     animation: dot-flashing 1s infinite alternate;
     animation-delay: 1s;
   }
   @keyframes dot-flashing {
     0% {
-      background-color: hsl(var(--primary-foreground));
+      background-color: hsl(var(--foreground));
     }
     50%,
     100% {
-      background-color: hsl(var(--primary-foreground) / 0.3);
+      background-color: hsl(var(--foreground) / 0.3);
     }
   }
 }
