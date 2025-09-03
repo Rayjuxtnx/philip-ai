@@ -137,10 +137,6 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                       </div>
                     )}
                     {message.content && <p>{message.content}</p>}
-                     <div className='flex items-center gap-2 text-xs text-muted-foreground pt-2'>
-                        <Lock size={12} />
-                        <span>This message is encrypted so no other user can see it.</span>
-                      </div>
                   </div>
                 </div>
                  {message.role === 'model' && (
@@ -219,6 +215,10 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
             <span className="sr-only">Send message</span>
           </Button>
         </form>
+        <div className='flex items-center justify-center gap-2 text-xs text-muted-foreground pt-2 max-w-4xl mx-auto'>
+            <Lock size={12} />
+            <span>Your conversation is end-to-end encrypted and no other user can see it.</span>
+        </div>
       </div>
     </div>
   );
