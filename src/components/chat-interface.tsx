@@ -215,9 +215,14 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
             <span className="sr-only">Send message</span>
           </Button>
         </form>
-        <div className='flex items-center justify-center gap-2 text-xs text-muted-foreground pt-2 max-w-4xl mx-auto'>
-            <Lock size={12} />
-            <span>Your conversation is end-to-end encrypted and no other user can see it.</span>
+        <div className='flex items-center justify-center flex-col gap-1 text-xs text-muted-foreground pt-2 max-w-4xl mx-auto'>
+            <div className='flex items-center gap-2'>
+                <Lock size={12} />
+                <span>Your conversation is end-to-end encrypted and no other user can see it.</span>
+            </div>
+            <div>
+                <span>Philip Virtual Assistant can make mistakes. Consider checking important information.</span>
+            </div>
         </div>
       </div>
     </div>
