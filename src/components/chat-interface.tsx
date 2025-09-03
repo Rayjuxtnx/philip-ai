@@ -99,7 +99,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
   return (
     <div className="flex flex-col h-full">
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6">
-        <div className="space-y-8 max-w-4xl mx-auto">
+        <div className="space-y-8 max-w-4xl mx-auto w-full">
             {messages.map((message) => (
               <div
                 key={message.id}
