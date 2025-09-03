@@ -225,6 +225,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                 <Lock size={12} />
                 <span>Your conversation is end-to-end encrypted and no other user can see it.</span>
             </div>
+            <span>Signup and Login to track history is coming soon.</span>
         </div>
       </div>
     </div>
