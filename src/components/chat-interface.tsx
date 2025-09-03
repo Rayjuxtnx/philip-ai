@@ -105,7 +105,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                 key={message.id}
                 className={cn(
                   'flex items-start gap-4 animate-bubble-in',
-                  message.role === 'model' ? 'justify-end' : 'justify-start'
+                  message.role === 'user' ? 'justify-start' : 'justify-end'
                 )}
               >
                 {message.role === 'user' && (
@@ -118,7 +118,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                 <div
                   className={cn(
                     'flex-1 space-y-2 max-w-[75%]',
-                     message.role === 'model' ? 'text-right' : 'text-left'
+                     message.role === 'user' ? 'text-left' : 'text-right'
                   )}
                 >
                    <p className="font-bold">
