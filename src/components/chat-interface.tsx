@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef, useEffect, type FormEvent } from 'react';
-import { Bot, Paperclip, SendHorizontal, User, X, Lock } from 'lucide-react';
+import { Paperclip, SendHorizontal, User, X, Lock } from 'lucide-react';
 import Image from 'next/image';
 
 import { getAiResponse } from '@/app/actions';
@@ -18,6 +18,17 @@ const LoadingDots = () => (
   <div className="flex items-center space-x-2">
     <div className="dot-flashing"></div>
   </div>
+);
+
+const HoodieIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    {...props}
+  >
+    <path d="M12 2a10 10 0 0 0-9.2 13.34c.26.47.7.75 1.2.75h16c.5 0 .94-.28 1.2-.75A10 10 0 0 0 12 2zm-4.21 12.59.02-1.63c0-.49-.4-.89-.89-.89s-.89.4-.89.89v2.25c0 .55.45 1 1 1h.76v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2h.76c.55 0 1-.45 1-1V12.7c0-.49-.4-.89-.89-.89s-.89.4-.89.89l.02 1.63c-1.31.84-2.87.84-4.18 0z" />
+  </svg>
 );
 
 interface ChatInterfaceProps {
@@ -98,7 +109,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full w-full">
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="space-y-8 max-w-4xl mx-auto w-full">
             {messages.map((message) => (
@@ -154,7 +165,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                  {message.role === 'model' && (
                   <Avatar className="w-8 h-8">
                      <AvatarFallback>
-                      <Bot />
+                      <HoodieIcon className="w-6 h-6" />
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -170,7 +181,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                 </div>
                 <Avatar className="w-8 h-8">
                   <AvatarFallback>
-                    <Bot />
+                    <HoodieIcon className="w-6 h-6" />
                   </AvatarFallback>
                 </Avatar>
               </div>
