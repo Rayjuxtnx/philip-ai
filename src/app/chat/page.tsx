@@ -14,7 +14,7 @@ export default function ChatPage() {
         {
           id: '1',
           role: 'model',
-          content: 'Hello! I am Philip Virtual Assistant. How can I help you today?',
+          content: 'Hello! I am the Philip Virtual Assistant, ready to help.',
         },
       ],
     },
