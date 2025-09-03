@@ -105,7 +105,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                 key={message.id}
                 className={cn(
                   'flex items-start gap-4 animate-bubble-in',
-                  message.role === 'user' ? 'justify-start' : 'justify-end'
+                  message.role === 'model' ? 'justify-end' : 'justify-start'
                 )}
               >
                 {message.role === 'user' && (

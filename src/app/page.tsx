@@ -11,6 +11,7 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
 
 export type Message = {
   id: string;
@@ -83,9 +84,6 @@ export default function Home() {
   return (
     <>
       <Sidebar>
-        <SidebarHeader>
-          <SidebarTrigger />
-        </SidebarHeader>
         <SidebarContent>
           <ChatHistory
             conversations={conversations}
@@ -96,7 +94,10 @@ export default function Home() {
         </SidebarContent>
       </Sidebar>
       <SidebarInset>
-        <main className="flex h-screen flex-col items-center bg-background">
+        <div className="p-2">
+            <SidebarTrigger />
+        </div>
+        <main className="flex h-[calc(100vh-44px)] flex-col items-center bg-background">
           <div className="flex-1 w-full overflow-y-auto">
             {activeConversation && (
               <ChatInterface
