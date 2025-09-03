@@ -88,40 +88,51 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                 key={message.id}
                 className={cn(
                   'flex items-start gap-4 animate-bubble-in',
+                  message.role === 'model' ? 'justify-end' : ''
                 )}
               >
+                {message.role === 'user' && (
                   <Avatar className="w-8 h-8">
                      <AvatarFallback>
-                      {message.role === 'user' ? <User /> : <Bot />}
+                      <User />
                     </AvatarFallback>
                   </Avatar>
+                )}
                 <div
                   className={cn(
-                    'flex-1 space-y-2',
+                    'flex-1 space-y-2 max-w-[75%]',
+                     message.role === 'model' ? 'text-right' : ''
                   )}
                 >
                    <p className="font-bold">
                     {message.role === 'user' ? 'You' : 'Chatty Companion'}
                   </p>
-                  <div className="prose prose-invert max-w-none text-foreground rounded-lg p-3 bg-card">
+                  <div className="prose prose-invert max-w-none text-foreground rounded-lg p-3 bg-card text-left">
                     {message.content}
                   </div>
                 </div>
+                 {message.role === 'model' && (
+                  <Avatar className="w-8 h-8">
+                     <AvatarFallback>
+                      <Bot />
+                    </AvatarFallback>
+                  </Avatar>
+                )}
               </div>
             ))}
             {isLoading && (
-              <div className="flex items-start gap-4 animate-bubble-in">
+              <div className="flex justify-end items-start gap-4 animate-bubble-in">
+                <div className="flex-1 space-y-2 max-w-[75%] text-right">
+                  <p className="font-bold">Chatty Companion</p>
+                  <div className="inline-block rounded-lg px-4 py-3 text-sm shadow bg-card text-card-foreground">
+                    <LoadingDots />
+                  </div>
+                </div>
                 <Avatar className="w-8 h-8">
                   <AvatarFallback>
                     <Bot />
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 space-y-2">
-                  <p className="font-bold">Chatty Companion</p>
-                  <div className="max-w-[75%] rounded-lg px-4 py-3 text-sm shadow bg-card text-card-foreground">
-                    <LoadingDots />
-                  </div>
-                </div>
               </div>
             )}
           </div>
