@@ -129,20 +129,18 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                       <div className='flex flex-col gap-2'>
                         <Image
                           src={message.imageUrl}
-                          alt="User uploaded content"
+                          alt="User or AI generated content"
                           width={400}
                           height={400}
                           className="rounded-md my-2"
                         />
-                         { message.role === 'model' && 
-                          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                            <Lock size={12} />
-                            <span>This message is encrypted so no other user can see it.</span>
-                          </div>
-                        }
                       </div>
                     )}
-                    {message.content}
+                    {message.content && <p>{message.content}</p>}
+                     <div className='flex items-center gap-2 text-xs text-muted-foreground pt-2'>
+                        <Lock size={12} />
+                        <span>This message is encrypted so no other user can see it.</span>
+                      </div>
                   </div>
                 </div>
                  {message.role === 'model' && (
