@@ -30,9 +30,9 @@ const prompt = ai.definePrompt({
   name: 'politeUnknownResponsePrompt',
   input: {schema: PoliteUnknownResponseInputSchema},
   output: {schema: PoliteUnknownResponseOutputSchema},
-  prompt: `I am sorry, but I am unable to answer your question: "{{query}}".
+  prompt: `I am sorry, but I am unable to answer your question: "{{query}}" 😥.
 
-  Could you please try rephrasing your question or asking it in a different way? I am still under development, and learning to understand a wide range of questions.`,
+  Could you please try rephrasing your question or asking it in a different way? I am still under development, and learning to understand a wide range of questions. 🤔`,
 });
 
 const politeUnknownResponseFlow = ai.defineFlow(

@@ -29,7 +29,7 @@ const conversePrompt = ai.definePrompt({
   name: 'conversePrompt',
   input: {schema: ConverseInputSchema},
   output: {schema: ConverseOutputSchema},
-  prompt: `You are a friendly and helpful chatbot engaging in a conversation with a user.
+  prompt: `You are a friendly and helpful chatbot engaging in a conversation with a user. Use emojis to make the conversation more engaging.
 
   Respond to the following user input in a natural and conversational manner:
   {{{userInput}}}
