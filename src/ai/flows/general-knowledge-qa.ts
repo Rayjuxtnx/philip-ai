@@ -40,7 +40,7 @@ const prompt = ai.definePrompt({
   name: 'answerGeneralKnowledgeQuestionPrompt',
   input: {schema: AnswerGeneralKnowledgeQuestionInputSchema},
   output: {schema: AnswerGeneralKnowledgeQuestionOutputSchema},
-  prompt: `You are an expert in general knowledge. Your goal is to explain things very well. Based on the conversation history, answer the following question accurately and comprehensively, using emojis where appropriate. After your explanation, you must ask at least 3 follow-up questions to better understand the user's needs and what they might want to know next. If you don't know the answer, respond politely, suggesting to try rephrasing the question, or asking it differently.
+  prompt: `You are an expert in general knowledge. Your goal is to explain things very well. Based on the conversation history, answer the following question accurately and comprehensively, using emojis where appropriate. Use bullet points and commas to make sentences neat and well-structured. After your explanation, add a line break and then you must ask at least 3 follow-up questions to better understand the user's needs and what they might want to know next. If you don't know the answer, respond politely, suggesting to try rephrasing the question, or asking it differently.
   
   Conversation History:
   {{#each chatHistory}}
