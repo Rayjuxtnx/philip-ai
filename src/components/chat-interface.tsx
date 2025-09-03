@@ -10,12 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import type { Message } from '@/app/page';
 
-interface Message {
-  id: string;
-  role: 'user' | 'model';
-  content: string;
-}
 
 const LoadingDots = () => (
   <div className="flex items-center space-x-2">
@@ -23,14 +19,12 @@ const LoadingDots = () => (
   </div>
 );
 
-export default function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'model',
-      content: 'Hello! I am Chatty Companion. How can I help you today?',
-    },
-  ]);
+interface ChatInterfaceProps {
+  messages: Message[];
+  setMessages: (messages: Message[]) => void;
+}
+
+export default function ChatInterface({ messages, setMessages }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -55,12 +49,13 @@ export default function ChatInterface() {
       role: 'user',
       content: input,
     };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput('');
     setIsLoading(true);
 
     try {
-      const chatHistory = messages.map(m => ({
+      const chatHistory = newMessages.map(m => ({
         role: m.role,
         parts: m.content
       }));
@@ -71,7 +66,7 @@ export default function ChatInterface() {
         role: 'model',
         content: response,
       };
-      setMessages((prev) => [...prev, botMessage]);
+      setMessages([...newMessages, botMessage]);
     } catch (error) {
       console.error('Failed to get AI response:', error);
       toast({
@@ -103,15 +98,12 @@ export default function ChatInterface() {
                 <div
                   className={cn(
                     'flex-1 space-y-2',
-                    message.role === 'user'
-                      ? 'bg-primary'
-                      : ''
                   )}
                 >
                    <p className="font-bold">
                     {message.role === 'user' ? 'You' : 'Chatty Companion'}
                   </p>
-                  <div className="prose prose-invert max-w-none text-foreground">
+                  <div className="prose prose-invert max-w-none text-foreground rounded-lg p-3 bg-card">
                     {message.content}
                   </div>
                 </div>
@@ -126,7 +118,7 @@ export default function ChatInterface() {
                 </Avatar>
                 <div className="flex-1 space-y-2">
                   <p className="font-bold">Chatty Companion</p>
-                  <div className="max-w-[75%] rounded-2xl px-4 py-3 text-sm shadow bg-card text-card-foreground rounded-bl-none">
+                  <div className="max-w-[75%] rounded-lg px-4 py-3 text-sm shadow bg-card text-card-foreground">
                     <LoadingDots />
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { MessageSquare, Plus } from 'lucide-react';
@@ -5,45 +6,49 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarMenuAction,
-  SidebarGroupContent,
 } from './ui/sidebar';
 import { Button } from './ui/button';
+import type { Conversation } from '@/app/page';
 
-export default function ChatHistory() {
-  const historyItems = [
-    'First conversation topic',
-    'A question about React',
-    'Tailwind CSS tips',
-    'Next.js routing query',
-    'ShadCN component styling',
-  ];
+interface ChatHistoryProps {
+  conversations: Conversation[];
+  activeConversationId: string | null;
+  setActiveConversationId: (id: string) => void;
+  onNewConversation: () => void;
+}
 
+export default function ChatHistory({
+  conversations,
+  activeConversationId,
+  setActiveConversationId,
+  onNewConversation,
+}: ChatHistoryProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="p-2">
-        <Button variant="outline" className="w-full justify-between">
+        <Button
+          variant="outline"
+          className="w-full justify-between"
+          onClick={onNewConversation}
+        >
           New Chat
           <Plus className="w-4 h-4" />
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto">
         <SidebarMenu>
-          <SidebarGroup>
-            <SidebarGroupLabel>Recent</SidebarGroupLabel>
-            <SidebarGroupContent>
-              {historyItems.map((item, index) => (
-                <SidebarMenuItem key={index}>
-                  <SidebarMenuButton className="truncate">
-                    <MessageSquare />
-                    {item}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {conversations.map((conversation) => (
+            <SidebarMenuItem key={conversation.id}>
+              <SidebarMenuButton
+                className="truncate"
+                isActive={conversation.id === activeConversationId}
+                onClick={() => setActiveConversationId(conversation.id)}
+              >
+                <MessageSquare />
+                {conversation.title}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
         </SidebarMenu>
       </div>
     </div>
