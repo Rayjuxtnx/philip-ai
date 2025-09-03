@@ -82,6 +82,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
         role: 'model',
         content: response.content,
         imageUrl: response.imageUrl,
+        isCode: response.isCode,
       };
       setMessages([...newMessages, botMessage]);
     } catch (error) {
@@ -136,7 +137,13 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                         />
                       </div>
                     )}
-                    {message.content && <p>{message.content}</p>}
+                    {message.content && (
+                      message.isCode ? (
+                        <pre className="bg-background text-foreground p-4 rounded-md overflow-x-auto"><code>{message.content}</code></pre>
+                      ) : (
+                        <p>{message.content}</p>
+                      )
+                    )}
                   </div>
                   {message.role === 'model' && (
                     <p className="text-xs text-muted-foreground pt-1">

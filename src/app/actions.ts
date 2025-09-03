@@ -7,15 +7,17 @@ import { generatePoliteUnknownResponse } from '@/ai/flows/polite-unknown-respons
 import { selectResponseTool } from '@/ai/flows/response-tool-selection';
 import { analyzeImage } from '@/ai/flows/image-analysis';
 import { generateImage } from '@/ai/flows/image-generation';
+import { generateCode } from '@/ai/flows/code-generation';
 
 const AVAILABLE_TOOLS = {
   CONVERSE: 'converse',
   QA: 'answerGeneralKnowledgeQuestion',
   ANALYZE_IMAGE: 'analyzeImage',
   GENERATE_IMAGE: 'generateImage',
+  CODE_GENERATION: 'generateCode',
 };
 
-export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts: string }[], newMessage: string, imageUrl?: string): Promise<{content: string, imageUrl?: string}> {
+export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts: string }[], newMessage: string, imageUrl?: string): Promise<{content: string, imageUrl?: string, isCode?: boolean}> {
   const userInput = newMessage;
   try {
     if (imageUrl) {
@@ -42,6 +44,10 @@ export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts
       case AVAILABLE_TOOLS.GENERATE_IMAGE:
         const imageResponse = await generateImage({ prompt: userInput });
         return { content: `Here is the image you asked for.`, imageUrl: imageResponse.imageUrl };
+
+      case AVAILABLE_TOOLS.CODE_GENERATION:
+        const codeResponse = await generateCode({ prompt: userInput });
+        return { content: codeResponse.code, isCode: true };
 
       default:
         const unknownResponse = await generatePoliteUnknownResponse({ query: userInput });
