@@ -45,15 +45,13 @@ export default function ChatPage() {
   };
 
   return (
-    <main className="flex h-screen flex-col items-center bg-background">
-      <div className="flex-1 w-full overflow-y-auto">
+    <main className="h-screen bg-background">
         {activeConversation && (
           <ChatInterface
             messages={activeConversation.messages}
             setMessages={setMessages}
           />
         )}
-      </div>
     </main>
   );
 }
