@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef, useEffect, type FormEvent } from 'react';
-import { Bot, Paperclip, SendHorizontal, User, X } from 'lucide-react';
+import { Bot, Paperclip, SendHorizontal, User, X, Lock } from 'lucide-react';
 import Image from 'next/image';
 
 import { getAiResponse } from '@/app/actions';
@@ -126,13 +126,21 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                   </p>
                   <div className={cn("prose prose-invert max-w-none text-foreground rounded-lg p-3 text-left", message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card')}>
                     {message.imageUrl && (
-                      <Image
-                        src={message.imageUrl}
-                        alt="User uploaded content"
-                        width={400}
-                        height={400}
-                        className="rounded-md my-2"
-                      />
+                      <div className='flex flex-col gap-2'>
+                        <Image
+                          src={message.imageUrl}
+                          alt="User uploaded content"
+                          width={400}
+                          height={400}
+                          className="rounded-md my-2"
+                        />
+                         { message.role === 'model' && 
+                          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+                            <Lock size={12} />
+                            <span>This message is encrypted so no other user can see it.</span>
+                          </div>
+                        }
+                      </div>
                     )}
                     {message.content}
                   </div>
