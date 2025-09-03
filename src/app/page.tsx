@@ -53,7 +53,7 @@ export default function Home() {
         {
           id: '1',
           role: 'model',
-          content: 'Hello! I am Chatty Companion. How can I help you today?',
+          content: 'Hello! I am Chatty Companion. How can I help you today? 🤖',
         },
       ],
     };

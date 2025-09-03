@@ -80,7 +80,8 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'model',
-        content: response,
+        content: response.content,
+        imageUrl: response.imageUrl,
       };
       setMessages([...newMessages, botMessage]);
     } catch (error) {
@@ -129,7 +130,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                         src={message.imageUrl}
                         alt="User uploaded content"
                         width={400}
-                        height={300}
+                        height={400}
                         className="rounded-md my-2"
                       />
                     )}
