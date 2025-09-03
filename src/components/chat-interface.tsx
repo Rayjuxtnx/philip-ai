@@ -88,7 +88,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                 key={message.id}
                 className={cn(
                   'flex items-start gap-4 animate-bubble-in',
-                  message.role === 'model' ? 'justify-end' : ''
+                  message.role === 'user' ? 'justify-start' : 'justify-end'
                 )}
               >
                 {message.role === 'user' && (
@@ -101,13 +101,13 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                 <div
                   className={cn(
                     'flex-1 space-y-2 max-w-[75%]',
-                     message.role === 'model' ? 'text-right' : ''
+                     message.role === 'model' ? 'text-right' : 'text-left'
                   )}
                 >
                    <p className="font-bold">
                     {message.role === 'user' ? 'You' : 'Chatty Companion'}
                   </p>
-                  <div className="prose prose-invert max-w-none text-foreground rounded-lg p-3 bg-card text-left">
+                  <div className={cn("prose prose-invert max-w-none text-foreground rounded-lg p-3 text-left", message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card')}>
                     {message.content}
                   </div>
                 </div>
