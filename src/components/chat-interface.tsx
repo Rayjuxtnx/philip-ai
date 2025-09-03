@@ -122,7 +122,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                   )}
                 >
                    <p className="font-bold">
-                    {message.role === 'user' ? 'You' : 'Chatty Companion'}
+                    {message.role === 'user' ? 'You' : 'Philip Virtual Assistant'}
                   </p>
                   <div className={cn("prose prose-invert max-w-none text-foreground rounded-lg p-3 text-left", message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card')}>
                     {message.imageUrl && (
@@ -151,7 +151,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
             {isLoading && (
               <div className="flex justify-end items-start gap-4 animate-bubble-in">
                 <div className="flex-1 space-y-2 max-w-[75%] text-right">
-                  <p className="font-bold">Chatty Companion</p>
+                  <p className="font-bold">Philip Virtual Assistant</p>
                   <div className="inline-block rounded-lg px-4 py-3 text-sm shadow bg-card text-card-foreground">
                     <LoadingDots />
                   </div>
