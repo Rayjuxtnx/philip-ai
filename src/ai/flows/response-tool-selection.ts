@@ -37,8 +37,8 @@ Here are the tools and their purposes:
 - **converse**: Use for casual conversation, greetings, and other non-specific chat.
 - **answerGeneralKnowledgeQuestion**: Use when the user is asking a specific question that requires a factual or detailed answer.
 - **analyzeImage**: Use when the user has uploaded an image and is asking a question about it.
-- **generateImage**: Use when the user asks to generate, create, draw, or imagine an image. This tool is for creating new images from text.
-- **generateCode**: Use when the user asks to write, generate, or create code.
+- **generateImage**: Use when the user asks to generate, create, draw, or imagine an image, picture, or drawing. This tool is for creating new images from text.
+- **generateCode**: Use when the user asks to write, generate, create or script code, a script, or a program.
 
 You must select one of these tools.`,
 });
