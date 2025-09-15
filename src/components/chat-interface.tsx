@@ -152,7 +152,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                       message.isCode ? (
                         <pre className="bg-background text-foreground p-4 rounded-md overflow-x-auto"><code>{message.content}</code></pre>
                       ) : (
-                        <p>{message.content}</p>
+                        <div className="whitespace-pre-wrap">{message.content}</div>
                       )
                     )}
                   </div>
