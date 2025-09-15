@@ -31,6 +31,35 @@ const HoodieIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const renderContent = (message: Message) => {
+  if (!message.content) return null;
+
+  if (message.isCode) {
+    return (
+      <pre className="bg-background text-foreground p-4 rounded-md overflow-x-auto">
+        <code>{message.content}</code>
+      </pre>
+    );
+  }
+
+  const lines = message.content.split('\n');
+  return (
+    <div className="whitespace-pre-wrap">
+      {lines.map((line, index) => {
+        const match = line.match(/^(🎨|💻|📈|🌐)\s/);
+        if (match) {
+          return (
+            <div key={index}>
+              <strong className="text-primary">{line}</strong>
+            </div>
+          );
+        }
+        return <div key={index}>{line}</div>;
+      })}
+    </div>
+  );
+};
+
 interface ChatInterfaceProps {
   messages: Message[];
   setMessages: (messages: Message[]) => void;
@@ -148,13 +177,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                         />
                       </div>
                     )}
-                    {message.content && (
-                      message.isCode ? (
-                        <pre className="bg-background text-foreground p-4 rounded-md overflow-x-auto"><code>{message.content}</code></pre>
-                      ) : (
-                        <div className="whitespace-pre-wrap">{message.content}</div>
-                      )
-                    )}
+                    {renderContent(message)}
                   </div>
                   {message.role === 'model' && (
                     <p className="text-xs text-muted-foreground pt-1">
