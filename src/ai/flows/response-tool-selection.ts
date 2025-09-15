@@ -34,13 +34,18 @@ const prompt = ai.definePrompt({
   prompt: `Given the user input: "{{userInput}}", and the available tools: {{availableTools}}, select the most appropriate tool to respond to the user. Just respond with the name of the tool.
 
 Here are the tools and their purposes:
-- **converse**: Use for casual conversation, greetings, and other non-specific chat.
-- **answerGeneralKnowledgeQuestion**: Use when the user is asking a specific question that requires a factual or detailed answer.
+- **converse**: Use for casual conversation, greetings, and other non-specific chat. This is for when the user is just talking or asking about the bot itself.
+  - Examples: "hello", "how are you?", "what's up", "who are you?"
+- **answerGeneralKnowledgeQuestion**: Use when the user is asking a specific question that requires a factual or detailed answer, like history, science, or information about a person or place.
+  - Examples: "what is the capital of France?", "who was the first president?", "explain quantum physics", "raila history"
 - **analyzeImage**: Use when the user has uploaded an image and is asking a question about it.
+  - Example: User uploads a picture and asks "what is in this image?"
 - **generateImage**: Use when the user asks to generate, create, draw, or imagine an image, picture, or drawing. This tool is for creating new images from text.
+  - Examples: "generate an image of a cat", "draw a picture of a house", "create an image of a superhero"
 - **generateCode**: Use when the user asks to write, generate, create or script code, a script, or a program.
+  - Examples: "write a python script to sort a list", "generate a javascript function to fetch data", "show me how to create a button in HTML"
 
-You must select one of these tools.`,
+You must select one of these tools based on the user's input.`,
 });
 
 const selectResponseToolFlow = ai.defineFlow(
