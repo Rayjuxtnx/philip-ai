@@ -36,7 +36,7 @@ const renderContent = (message: Message) => {
 
   if (message.isCode) {
     return (
-      <pre className="bg-background text-foreground p-4 rounded-md overflow-x-auto">
+      <pre className="bg-background text-foreground p-4 rounded-md overflow-x-auto text-sm">
         <code>{message.content}</code>
       </pre>
     );
@@ -158,27 +158,27 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
               <div
                 key={message.id}
                 className={cn(
-                  'flex items-start gap-4 animate-bubble-in',
-                  message.role === 'user' ? 'justify-start' : 'justify-end'
+                  'flex items-start gap-2 md:gap-4 animate-bubble-in',
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
                 )}
               >
-                {message.role === 'user' && (
-                  <Avatar className="w-8 h-8">
+                {message.role === 'model' && (
+                   <Avatar className="w-8 h-8">
                      <AvatarFallback>
-                      <User />
+                      <HoodieIcon className="w-6 h-6" />
                     </AvatarFallback>
                   </Avatar>
                 )}
                 <div
                   className={cn(
-                    'flex-1 space-y-2 max-w-[75%]',
-                     message.role === 'user' ? 'text-left' : 'text-right'
+                    'flex-1 space-y-2 max-w-[85%] md:max-w-[75%]',
+                     message.role === 'user' ? 'text-right' : 'text-left'
                   )}
                 >
-                   <p className="font-bold">
+                   <p className="font-bold text-sm">
                     {message.role === 'user' ? 'You' : 'Philip Virtual Assistant'}
                   </p>
-                  <div className={cn("prose prose-invert max-w-none text-foreground rounded-lg p-3 text-left", message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card')}>
+                  <div className={cn("prose prose-invert max-w-none text-foreground rounded-lg p-3 text-left text-sm md:text-base", message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card')}>
                     {message.imageUrl && (
                       <div className='flex flex-col gap-2'>
                         <Image
@@ -186,40 +186,40 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                           alt="User or AI generated content"
                           width={400}
                           height={400}
-                          className="rounded-md my-2"
+                          className="rounded-md my-2 max-w-full h-auto"
                         />
                       </div>
                     )}
                     {renderContent(message)}
                   </div>
                   {message.role === 'model' && (
-                    <p className="text-xs text-muted-foreground pt-1">
+                    <p className="text-xs text-muted-foreground pt-1 text-left">
                       Philip Virtual Assistant can make mistakes. Consider checking important information.
                     </p>
                   )}
                 </div>
-                 {message.role === 'model' && (
+                 {message.role === 'user' && (
                   <Avatar className="w-8 h-8">
                      <AvatarFallback>
-                      <HoodieIcon className="w-6 h-6" />
+                      <User />
                     </AvatarFallback>
                   </Avatar>
                 )}
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-end items-start gap-4 animate-bubble-in">
-                <div className="flex-1 space-y-2 max-w-[75%] text-right">
-                  <p className="font-bold">Philip Virtual Assistant</p>
-                  <div className="inline-block rounded-lg px-4 py-3 text-sm shadow bg-card text-card-foreground">
-                    <LoadingDots />
-                  </div>
-                </div>
+              <div className="flex justify-start items-start gap-4 animate-bubble-in">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback>
                     <HoodieIcon className="w-6 h-6" />
                   </AvatarFallback>
                 </Avatar>
+                <div className="flex-1 space-y-2 max-w-[75%] text-left">
+                  <p className="font-bold text-sm">Philip Virtual Assistant</p>
+                  <div className="inline-block rounded-lg px-4 py-3 text-sm shadow bg-card text-card-foreground">
+                    <LoadingDots />
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -285,3 +285,5 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
     </div>
   );
 }
+
+    
