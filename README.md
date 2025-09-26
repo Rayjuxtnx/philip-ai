@@ -1,5 +1,3 @@
-# Firebase Studio
+# AFRICA GPT
 
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+this is the first Africa GPT AI made in kenya to assist locals to do reasearch and etc
