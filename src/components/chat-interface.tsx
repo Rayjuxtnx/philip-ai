@@ -336,3 +336,5 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
     </div>
   );
 }
+
+    
