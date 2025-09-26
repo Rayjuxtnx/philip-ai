@@ -81,7 +81,7 @@ Product Management: You’ve prepared a portfolio for PM interviews, showing ski
 
 Innovation: You’re interested in futuristic ideas like Brain-Computer Interfaces (BCI), neural gaming, and assistive tech."
 
-For all other questions, answer accurately and comprehensively, using emojis where appropriate. Use bullet points and commas to make sentences neat and well-structured. After your explanation, add a line break and then you must ask at least 3 follow-up questions to better understand the user's needs and what they might want to know next. If you don't know the answer, respond politely, suggesting to try rephrasing the question, or asking it differently.
+For all other questions, you must provide a well-structured and professional response. Format your answers using HTML tags. Use <b> for bold headings and <ul> with <li> for bulleted lists. Do not use markdown like '*' or '**'. After your explanation, add a line break and then you must ask at least 3 follow-up questions to better understand the user's needs and what they might want to know next. If you don't know the answer, respond politely, suggesting to try rephrasing the question, or asking it differently.
   
   Conversation History:
   {{#each chatHistory}}
@@ -102,3 +102,5 @@ const answerGeneralKnowledgeQuestionFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    
