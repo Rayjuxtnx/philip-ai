@@ -31,12 +31,12 @@ const analyzeImagePrompt = ai.definePrompt({
   name: 'analyzeImagePrompt',
   input: {schema: AnalyzeImageInputSchema},
   output: {schema: AnalyzeImageOutputSchema},
-  prompt: `Analyze the following image and answer the user's question.
+  prompt: `You are an expert at analyzing images. Your task is to carefully examine the provided image and answer the user's question in detail.
 
 Image: {{media url=image}}
-Question: {{{question}}}
+User's Question: {{{question}}}
 
-Provide a detailed analysis of the image based on the question.`,
+Provide a comprehensive and detailed analysis of the image, focusing on the aspects relevant to the user's question. If it's a survey, a chart, or contains text, extract the information accurately. If it's a photograph, describe the scene, objects, and context.`,
 });
 
 const analyzeImageFlow = ai.defineFlow(
