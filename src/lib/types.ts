@@ -5,6 +5,7 @@ export type Message = {
   content: string;
   imageUrl?: string;
   isCode?: boolean;
+  codeLanguage?: string;
 };
 
 export type Conversation = {

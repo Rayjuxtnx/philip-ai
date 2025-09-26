@@ -17,7 +17,7 @@ const AVAILABLE_TOOLS = {
   CODE_GENERATION: 'generateCode',
 };
 
-export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts: string }[], newMessage: string, imageUrl?: string): Promise<{content: string, imageUrl?: string, isCode?: boolean}> {
+export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts: string }[], newMessage: string, imageUrl?: string): Promise<{content: string, imageUrl?: string, isCode?: boolean, codeLanguage?: string}> {
   const userInput = newMessage;
   try {
     if (imageUrl) {
@@ -47,7 +47,7 @@ export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts
 
       case AVAILABLE_TOOLS.CODE_GENERATION:
         const codeResponse = await generateCode({ prompt: userInput });
-        return { content: codeResponse.code, isCode: true };
+        return { content: codeResponse.code, isCode: true, codeLanguage: codeResponse.language };
 
       default:
         const unknownResponse = await generatePoliteUnknownResponse({ query: userInput });

@@ -18,6 +18,7 @@ export type GenerateCodeInput = z.infer<typeof GenerateCodeInputSchema>;
 
 const GenerateCodeOutputSchema = z.object({
   code: z.string().describe('The generated code snippet.'),
+  language: z.string().describe('The programming language of the generated code (e.g., "javascript", "python"). Default to "text" if unknown.'),
 });
 export type GenerateCodeOutput = z.infer<typeof GenerateCodeOutputSchema>;
 
@@ -34,7 +35,8 @@ const generateCodePrompt = ai.definePrompt({
 The user wants to generate the following code:
 "{{{prompt}}}"
 
-Provide only the code requested, without any additional explanation or pleasantries.
+First, identify the programming language of the code you are about to generate.
+Then, provide only the code requested, without any additional explanation or pleasantries.
 Do not wrap the code in markdown backticks. Just return the raw code.
 `,
 });

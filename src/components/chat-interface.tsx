@@ -2,8 +2,10 @@
 'use client';
 
 import { useState, useRef, useEffect, type FormEvent } from 'react';
-import { Paperclip, SendHorizontal, User, X, Lock } from 'lucide-react';
+import { Paperclip, SendHorizontal, User, X, Lock, Clipboard } from 'lucide-react';
 import Image from 'next/image';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { getAiResponse } from '@/app/actions';
 import { Input } from '@/components/ui/input';
@@ -31,20 +33,64 @@ const HoodieIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+const CodeBlock = ({ language, code }: { language: string, code: string }) => {
+  const { toast } = useToast();
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    toast({
+      title: 'Copied to clipboard!',
+    });
+  };
+
+  return (
+    <div className="relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-2 right-2 h-7 w-7 text-white/50 hover:text-white"
+        onClick={handleCopy}
+      >
+        <Clipboard className="h-4 w-4" />
+      </Button>
+      <SyntaxHighlighter
+        language={language}
+        style={vscDarkPlus}
+        customStyle={{ 
+          margin: 0,
+          borderRadius: '0.375rem',
+          backgroundColor: '#1E1E1E',
+          whiteSpace: 'pre-wrap', 
+          wordBreak: 'break-all',
+        }}
+        wrapLongLines={true}
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
+  );
+};
+
+
 const renderContent = (message: Message) => {
   if (!message.content) return null;
 
   if (message.isCode) {
     return (
-      <pre className="bg-background text-foreground p-4 rounded-md overflow-x-auto text-sm">
-        <code>{message.content}</code>
-      </pre>
+      <CodeBlock language={message.codeLanguage || 'text'} code={message.content} />
     );
   }
 
-  // Sanitize and render HTML content
-  return <div className="prose prose-invert max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: message.content.replace(/\n/g, '<br />') }} />;
+  const contentWithHtml = message.content
+    .replace(/\n/g, '<br />')
+    .replace(/(\p{Emoji_Presentation}\s*)?<b>(.*?)<\/b>/gu, (match, emoji, text) => {
+      const emojiSpan = emoji ? `<span class="mr-2">${emoji.trim()}</span>` : '';
+      return `<div class="font-bold text-lg mb-2 flex items-center">${emojiSpan}<strong>${text}</strong></div>`;
+    });
+
+  return <div className="prose prose-invert max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: contentWithHtml }} />;
 };
+
 
 interface ChatInterfaceProps {
   messages: Message[];
@@ -136,6 +182,7 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
         content: response.content,
         imageUrl: response.imageUrl,
         isCode: response.isCode,
+        codeLanguage: response.codeLanguage,
       };
       setMessages([...newMessages, botMessage]);
     } catch (error) {
@@ -178,7 +225,11 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                    <p className="font-bold text-sm">
                     {message.role === 'user' ? 'You' : 'Philip Virtual Assistant'}
                   </p>
-                  <div className={cn("prose prose-invert max-w-none text-foreground rounded-lg p-3 text-left text-sm md:text-base", message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card')}>
+                  <div className={cn(
+                    "prose prose-invert max-w-none text-foreground rounded-lg text-left text-sm md:text-base", 
+                    !message.isCode && 'p-3',
+                    message.role === 'user' ? 'bg-primary text-primary-foreground' : (message.isCode ? 'bg-transparent p-0' : 'bg-card')
+                    )}>
                     {message.imageUrl && (
                       <div className='flex flex-col gap-2'>
                         <Image
@@ -285,5 +336,3 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
     </div>
   );
 }
-
-    
