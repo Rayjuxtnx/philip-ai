@@ -80,6 +80,33 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
     }
   };
 
+  useEffect(() => {
+    const handlePaste = (event: ClipboardEvent) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.includes('image')) {
+          const file = items[i].getAsFile();
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              setImage(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+            event.preventDefault();
+            break;
+          }
+        }
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => {
+      document.removeEventListener('paste', handlePaste);
+    };
+  }, []);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if ((!input.trim() && !image) || isLoading) return;
