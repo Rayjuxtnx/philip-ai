@@ -42,22 +42,8 @@ const renderContent = (message: Message) => {
     );
   }
 
-  const lines = message.content.split('\n');
-  return (
-    <div className="whitespace-pre-wrap">
-      {lines.map((line, index) => {
-        const match = line.match(/^(🎨|💻|📈|🌐)\s/);
-        if (match) {
-          return (
-            <div key={index} className="pt-2">
-              <strong className="text-primary">{line}</strong>
-            </div>
-          );
-        }
-        return <div key={index}>{line}</div>;
-      })}
-    </div>
-  );
+  // Sanitize and render HTML content
+  return <div className="prose prose-invert max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: message.content.replace(/\n/g, '<br />') }} />;
 };
 
 interface ChatInterfaceProps {
