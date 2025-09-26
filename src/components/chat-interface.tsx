@@ -49,7 +49,7 @@ const renderContent = (message: Message) => {
         const match = line.match(/^(🎨|💻|📈|🌐)\s/);
         if (match) {
           return (
-            <div key={index}>
+            <div key={index} className="pt-2">
               <strong className="text-primary">{line}</strong>
             </div>
           );
