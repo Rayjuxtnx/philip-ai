@@ -5,15 +5,23 @@ import { useState, useEffect } from 'react';
 import ChatInterface from '@/components/chat-interface';
 import ChatHistory from '@/components/chat-history';
 import type { Conversation } from '@/lib/types';
-import { useFirestore, useAuth } from '@/firebase';
+import { useFirestore, useAuth, useUser } from '@/firebase';
 import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { Sidebar, SidebarProvider, SidebarInset, SidebarTrigger, SidebarHeader } from '@/components/ui/sidebar';
+import { useRouter } from 'next/navigation';
 
 export default function ChatPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const firestore = useFirestore();
-  const { user } = useAuth();
+  const { user, isAuthLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.replace('/');
+    }
+  }, [user, isAuthLoading, router]);
 
   useEffect(() => {
     if (!firestore || !user) return;
@@ -31,9 +39,13 @@ export default function ChatPage() {
 
       if (activeConversationId === null && convos.length > 0) {
         setActiveConversationId(convos[0].id);
-      } else if (activeConversationId === null && convos.length === 0) {
-        handleNewConversation();
+      } else if (convos.length === 0 && activeConversationId !== 'new-chat-placeholder') {
+        // If there are no convos, we don't auto-create one.
+        // We let the ChatInterface handle the creation on first message.
       }
+    }, (error) => {
+      console.error("Error fetching conversations:", error);
+      // Handle error appropriately
     });
 
     return () => unsubscribe();
@@ -60,6 +72,14 @@ export default function ChatPage() {
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
   );
+  
+  if (isAuthLoading || !user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="dot-flashing"></div>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>

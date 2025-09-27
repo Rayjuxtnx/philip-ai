@@ -13,12 +13,20 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (user) {
+    if (user && !isAuthLoading) {
       router.replace('/chat');
     }
-  }, [user, router]);
+  }, [user, isAuthLoading, router]);
 
-  if (isAuthLoading || user) {
+  if (isAuthLoading) {
+    return (
+      <main className="flex items-center justify-center h-screen bg-background">
+        <div className="dot-flashing"></div>
+      </main>
+    );
+  }
+
+  if (user) {
     return (
       <main className="flex items-center justify-center h-screen bg-background">
         <div className="dot-flashing"></div>
