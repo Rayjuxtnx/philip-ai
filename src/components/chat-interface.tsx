@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect, type FormEvent } from 'react';
-import { Paperclip, SendHorizontal, User, X, Lock, Clipboard } from 'lucide-react';
+import { Paperclip, SendHorizontal, User, X, Clipboard } from 'lucide-react';
 import Image from 'next/image';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useFirestore, useAuth } from '@/firebase';
-import { collection, addDoc, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
 
 import { getAiResponse } from '@/app/actions';
 import { Input } from '@/components/ui/input';
@@ -101,7 +101,7 @@ export default function ChatInterface({ conversation }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(conversation.messages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -184,17 +184,17 @@ export default function ChatInterface({ conversation }: ChatInterfaceProps) {
     setInput('');
     setImage(null);
 
-    const userMessage: Omit<Message, 'id'> = {
+    const userMessage: Omit<Message, 'id'| 'createdAt'> & { createdAt: any } = {
       role: 'user',
       content: userMessageContent,
       imageUrl: userImage || undefined,
-      createdAt: new Date().toISOString(),
+      createdAt: serverTimestamp(),
     };
     
     const messagesRef = collection(firestore, 'users', user.uid, 'conversations', conversation.id, 'messages');
     await addDoc(messagesRef, userMessage);
 
-    if (conversation.title === 'New Chat' && messages.length === 1) {
+    if (conversation.title === 'New Chat' && messages.length <= 1) {
       const conversationRef = doc(firestore, 'users', user.uid, 'conversations', conversation.id);
       await updateDoc(conversationRef, {
         title: userMessageContent.substring(0, 30),
@@ -208,13 +208,13 @@ export default function ChatInterface({ conversation }: ChatInterfaceProps) {
       }));
 
       const response = await getAiResponse(chatHistoryForAI, userMessageContent, userImage || undefined);
-      const botMessage: Omit<Message, 'id'> = {
+      const botMessage: Omit<Message, 'id'| 'createdAt'> & { createdAt: any } = {
         role: 'model',
         content: response.content,
         imageUrl: response.imageUrl,
         isCode: response.isCode,
         codeLanguage: response.codeLanguage,
-        createdAt: new Date().toISOString(),
+        createdAt: serverTimestamp(),
       };
       await addDoc(messagesRef, botMessage);
     } catch (error) {
@@ -358,13 +358,8 @@ export default function ChatInterface({ conversation }: ChatInterfaceProps) {
             <span className="sr-only">Send message</span>
           </Button>
         </form>
-        {!user && <p className="text-center text-xs text-muted-foreground pt-2">Please sign in to start a conversation.</p>}
-        <div className='flex items-center justify-center flex-col gap-1 text-xs text-muted-foreground pt-2 max-w-4xl mx-auto'>
-            <div className='flex items-center gap-2'>
-                <Lock size={12} />
-                <span>Your conversation is end-to-end encrypted and no other user can see it.</span>
-            </div>
-            <span>Signup and Login to track history is coming soon.</span>
+        <div className='flex items-center justify-center pt-2 max-w-4xl mx-auto'>
+            { !user && <p className="text-xs text-muted-foreground">Please sign in to start a conversation.</p>}
         </div>
       </div>
     </div>

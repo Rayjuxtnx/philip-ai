@@ -1,3 +1,4 @@
+import { FieldValue } from 'firebase/firestore';
 
 export type Message = {
   id: string;
@@ -6,12 +7,11 @@ export type Message = {
   imageUrl?: string;
   isCode?: boolean;
   codeLanguage?: string;
-  createdAt: string;
+  createdAt: any;
 };
 
 export type Conversation = {
   id:string;
   title: string;
-  messages: Message[];
-  createdAt: Date;
+  createdAt: any;
 };
