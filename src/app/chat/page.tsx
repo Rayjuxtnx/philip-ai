@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -30,6 +31,8 @@ export default function ChatPage() {
 
       if (activeConversationId === null && convos.length > 0) {
         setActiveConversationId(convos[0].id);
+      } else if (activeConversationId === null && convos.length === 0) {
+        handleNewConversation();
       }
     });
 
@@ -54,14 +57,6 @@ export default function ChatPage() {
     setActiveConversationId(docRef.id);
   };
 
-  useEffect(() => {
-    if (user && conversations.length === 0) {
-      handleNewConversation();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, conversations.length]);
-
-
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
   );
@@ -80,18 +75,11 @@ export default function ChatPage() {
         <SidebarHeader className="md:hidden sticky top-0 bg-background/75 backdrop-blur-sm z-10">
           <SidebarTrigger />
         </SidebarHeader>
-        {activeConversation && firestore ? (
-          <ChatInterface
-            key={activeConversation.id}
-            conversation={activeConversation}
-          />
-        ) : (
-          <div className="flex flex-1 items-center justify-center">
-            <div className="text-center">
-              <p className="text-muted-foreground">Select a conversation or start a new one.</p>
-            </div>
-          </div>
-        )}
+        <ChatInterface
+          key={activeConversation?.id || 'new'}
+          conversation={activeConversation}
+          onNewConversation={handleNewConversation}
+        />
       </SidebarInset>
     </SidebarProvider>
   );

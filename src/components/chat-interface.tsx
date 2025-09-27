@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, type FormEvent } from 'react';
@@ -94,10 +95,11 @@ const renderContent = (message: Message) => {
 
 
 interface ChatInterfaceProps {
-  conversation: Conversation;
+  conversation: Conversation | null | undefined;
+  onNewConversation: () => Promise<void>;
 }
 
-export default function ChatInterface({ conversation }: ChatInterfaceProps) {
+export default function ChatInterface({ conversation, onNewConversation }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -115,7 +117,10 @@ export default function ChatInterface({ conversation }: ChatInterfaceProps) {
   };
 
   useEffect(() => {
-    if (!firestore || !user || !conversation.id) return;
+    if (!firestore || !user || !conversation?.id) {
+        setMessages([]);
+        return;
+    }
 
     const messagesRef = collection(firestore, 'users', user.uid, 'conversations', conversation.id, 'messages');
     const q = query(messagesRef, orderBy('createdAt'));
@@ -129,7 +134,7 @@ export default function ChatInterface({ conversation }: ChatInterfaceProps) {
     });
 
     return () => unsubscribe();
-  }, [firestore, user, conversation.id]);
+  }, [firestore, user, conversation]);
 
   useEffect(() => {
     scrollToBottom();
@@ -176,6 +181,17 @@ export default function ChatInterface({ conversation }: ChatInterfaceProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if ((!input.trim() && !image) || isLoading || !firestore || !user) return;
+    
+    let currentConversation = conversation;
+    if (!currentConversation) {
+        await onNewConversation();
+        // The parent component will re-render with the new conversation,
+        // so we can wait for the next render to send the message.
+        // For now, we'll just set the input and let the user re-submit.
+        // A more advanced solution might involve a callback or state lift.
+        return;
+    }
+
     setIsLoading(true);
 
     const userMessageContent = input;
@@ -191,11 +207,11 @@ export default function ChatInterface({ conversation }: ChatInterfaceProps) {
       createdAt: serverTimestamp(),
     };
     
-    const messagesRef = collection(firestore, 'users', user.uid, 'conversations', conversation.id, 'messages');
+    const messagesRef = collection(firestore, 'users', user.uid, 'conversations', currentConversation.id, 'messages');
     await addDoc(messagesRef, userMessage);
 
-    if (conversation.title === 'New Chat' && messages.length <= 1) {
-      const conversationRef = doc(firestore, 'users', user.uid, 'conversations', conversation.id);
+    if (currentConversation.title === 'New Chat' && messages.length <= 1) {
+      const conversationRef = doc(firestore, 'users', user.uid, 'conversations', currentConversation.id);
       await updateDoc(conversationRef, {
         title: userMessageContent.substring(0, 30),
       });
