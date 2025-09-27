@@ -1,0 +1,32 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // USERS
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId);
+    }
+
+    // CONVERSATIONS
+    match /users/{userId}/conversations/{conversationId} {
+      allow read, write: if isOwner(userId);
+
+      // MESSAGES
+      match /messages/{messageId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+  }
+}

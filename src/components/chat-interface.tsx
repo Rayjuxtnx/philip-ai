@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, type FormEvent } from 'react';
@@ -6,6 +5,8 @@ import { Paperclip, SendHorizontal, User, X, Lock, Clipboard } from 'lucide-reac
 import Image from 'next/image';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useFirestore, useAuth } from '@/firebase';
+import { collection, addDoc, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 import { getAiResponse } from '@/app/actions';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import type { Message } from '@/lib/types';
+import type { Message, Conversation } from '@/lib/types';
 
 
 const LoadingDots = () => (
@@ -56,11 +57,11 @@ const CodeBlock = ({ language, code }: { language: string, code: string }) => {
       <SyntaxHighlighter
         language={language}
         style={vscDarkPlus}
-        customStyle={{ 
+        customStyle={{
           margin: 0,
           borderRadius: '0.375rem',
           backgroundColor: '#1E1E1E',
-          whiteSpace: 'pre-wrap', 
+          whiteSpace: 'pre-wrap',
           wordBreak: 'break-all',
         }}
         wrapLongLines={true}
@@ -93,23 +94,42 @@ const renderContent = (message: Message) => {
 
 
 interface ChatInterfaceProps {
-  messages: Message[];
-  setMessages: (messages: Message[]) => void;
+  conversation: Conversation;
 }
 
-export default function ChatInterface({ messages, setMessages }: ChatInterfaceProps) {
+export default function ChatInterface({ conversation }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<Message[]>(conversation.messages);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const { user } = useAuth();
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
+
+  useEffect(() => {
+    if (!firestore || !user || !conversation.id) return;
+
+    const messagesRef = collection(firestore, 'users', user.uid, 'conversations', conversation.id, 'messages');
+    const q = query(messagesRef, orderBy('createdAt'));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const newMessages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Message));
+      setMessages(newMessages);
+    });
+
+    return () => unsubscribe();
+  }, [firestore, user, conversation.id]);
 
   useEffect(() => {
     scrollToBottom();
@@ -155,36 +175,48 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if ((!input.trim() && !image) || isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: input,
-      imageUrl: image || undefined,
-    };
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
-    setInput('');
-    setImage(null);
+    if ((!input.trim() && !image) || isLoading || !firestore || !user) return;
     setIsLoading(true);
 
+    const userMessageContent = input;
+    const userImage = image;
+
+    setInput('');
+    setImage(null);
+
+    const userMessage: Omit<Message, 'id'> = {
+      role: 'user',
+      content: userMessageContent,
+      imageUrl: userImage || undefined,
+      createdAt: new Date().toISOString(),
+    };
+    
+    const messagesRef = collection(firestore, 'users', user.uid, 'conversations', conversation.id, 'messages');
+    await addDoc(messagesRef, userMessage);
+
+    if (conversation.title === 'New Chat' && messages.length === 1) {
+      const conversationRef = doc(firestore, 'users', user.uid, 'conversations', conversation.id);
+      await updateDoc(conversationRef, {
+        title: userMessageContent.substring(0, 30),
+      });
+    }
+
     try {
-      const chatHistory = newMessages.map(m => ({
+      const chatHistoryForAI = messages.map(m => ({
         role: m.role,
         parts: m.content
       }));
 
-      const response = await getAiResponse(chatHistory, userMessage.content, userMessage.imageUrl);
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
+      const response = await getAiResponse(chatHistoryForAI, userMessageContent, userImage || undefined);
+      const botMessage: Omit<Message, 'id'> = {
         role: 'model',
         content: response.content,
         imageUrl: response.imageUrl,
         isCode: response.isCode,
         codeLanguage: response.codeLanguage,
+        createdAt: new Date().toISOString(),
       };
-      setMessages([...newMessages, botMessage]);
+      await addDoc(messagesRef, botMessage);
     } catch (error) {
       console.error('Failed to get AI response:', error);
       toast({
@@ -226,9 +258,10 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
                     {message.role === 'user' ? 'You' : 'Philip Virtual Assistant'}
                   </p>
                   <div className={cn(
-                    "prose prose-invert max-w-none text-foreground rounded-lg text-left text-sm md:text-base", 
+                    "prose prose-invert max-w-none text-foreground rounded-lg text-sm md:text-base",
+                    'w-full break-words',
                     !message.isCode && 'p-3',
-                    message.role === 'user' ? 'bg-primary text-primary-foreground' : (message.isCode ? 'bg-transparent p-0' : 'bg-card')
+                    message.role === 'user' ? 'bg-primary text-primary-foreground' : (message.isCode ? 'bg-transparent p-0' : 'bg-card text-left')
                     )}>
                     {message.imageUrl && (
                       <div className='flex flex-col gap-2'>
@@ -320,11 +353,12 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
             className="flex-1 bg-muted border-0 ring-offset-0 focus-visible:ring-1 focus-visible:ring-ring"
             disabled={isLoading}
           />
-          <Button type="submit" size="icon" disabled={isLoading} className="bg-accent hover:bg-accent/90">
+          <Button type="submit" size="icon" disabled={isLoading || !user} className="bg-accent hover:bg-accent/90">
             <SendHorizontal className="h-4 w-4 text-accent-foreground" />
             <span className="sr-only">Send message</span>
           </Button>
         </form>
+        {!user && <p className="text-center text-xs text-muted-foreground pt-2">Please sign in to start a conversation.</p>}
         <div className='flex items-center justify-center flex-col gap-1 text-xs text-muted-foreground pt-2 max-w-4xl mx-auto'>
             <div className='flex items-center gap-2'>
                 <Lock size={12} />
@@ -336,5 +370,3 @@ export default function ChatInterface({ messages, setMessages }: ChatInterfacePr
     </div>
   );
 }
-
-    
