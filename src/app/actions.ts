@@ -51,7 +51,12 @@ export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts
 
       case AVAILABLE_TOOLS.CODE_GENERATION:
         const codeResponse = await generateCode({ prompt: userInput });
-        return { content: codeResponse.code, isCode: true, codeLanguage: codeResponse.language };
+        const codeResult: { content: string, isCode?: boolean, codeLanguage?: string } = { content: codeResponse.code };
+        if (codeResponse.code) {
+          codeResult.isCode = true;
+          codeResult.codeLanguage = codeResponse.language;
+        }
+        return codeResult;
 
       default:
         const unknownResponse = await generatePoliteUnknownResponse({ query: userInput });

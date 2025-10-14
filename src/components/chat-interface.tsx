@@ -169,7 +169,7 @@ export default function ChatInterface({ conversation, messages, onNewMessage, on
     setInput('');
     setImage(null);
 
-    const userMessage: Message = {
+    const userMessage: Partial<Message> = {
         id: `msg-${Date.now()}`,
         role: 'user',
         content: userMessageContent,
@@ -180,21 +180,21 @@ export default function ChatInterface({ conversation, messages, onNewMessage, on
         userMessage.imageUrl = userImage;
       }
     
-    onNewMessage(userMessage);
+    onNewMessage(userMessage as Message);
 
     if (conversation.title === 'New Chat' && messages.length === 0) {
         onTitleUpdate(conversation.id, userMessageContent.substring(0, 30))
     }
 
     try {
-      const chatHistoryForAI = [...messages, userMessage].map(m => ({
+      const chatHistoryForAI = [...messages, userMessage as Message].map(m => ({
         role: m.role,
         parts: m.content
       }));
 
       const response = await getAiResponse(chatHistoryForAI, userMessageContent, userImage || undefined);
       
-      const botMessage: Message = {
+      const botMessage: Partial<Message> = {
         id: `msg-${Date.now()}-bot`,
         role: 'model',
         content: response.content,
@@ -211,7 +211,7 @@ export default function ChatInterface({ conversation, messages, onNewMessage, on
         botMessage.imageUrl = response.imageUrl;
       }
 
-      onNewMessage(botMessage);
+      onNewMessage(botMessage as Message);
     } catch (error) {
       console.error('Failed to get AI response:', error);
       toast({
