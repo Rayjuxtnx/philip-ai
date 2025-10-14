@@ -7,11 +7,11 @@ export type Message = {
   imageUrl?: string;
   isCode?: boolean;
   codeLanguage?: string;
-  createdAt: any;
+  createdAt: FieldValue | Date;
 };
 
 export type Conversation = {
   id:string;
   title: string;
-  createdAt: any;
+  createdAt: FieldValue | Date;
 };

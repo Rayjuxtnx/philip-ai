@@ -6,6 +6,7 @@ import { Paperclip, SendHorizontal, User, X, Clipboard } from 'lucide-react';
 import Image from 'next/image';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { serverTimestamp } from 'firebase/firestore';
 
 import { getAiResponse } from '@/app/actions';
 import { Input } from '@/components/ui/input';
@@ -94,15 +95,16 @@ const renderContent = (message: Message) => {
 
 interface ChatInterfaceProps {
   conversation: Conversation | null | undefined;
-  onNewConversation: () => Promise<void> | void;
+  messages: Message[];
+  onNewMessage: (message: Message) => void;
   onTitleUpdate: (conversationId: string, newTitle: string) => void;
 }
 
-export default function ChatInterface({ conversation, onNewConversation, onTitleUpdate }: ChatInterfaceProps) {
+export default function ChatInterface({ conversation, messages, onNewMessage, onTitleUpdate }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -112,19 +114,7 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
-
-  useEffect(() => {
-    // Reset messages when conversation changes
-    setMessages([
-        {
-            id: 'initial-message',
-            role: 'model',
-            content: 'Hello! I am the Philip Virtual Assistant, ready to help.',
-            createdAt: new Date(),
-        }
-    ]);
-  }, [conversation]);
-
+  
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -169,16 +159,8 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if ((!input.trim() && !image) || isLoading) return;
+    if ((!input.trim() && !image) || isLoading || !conversation) return;
     
-    let currentConversation = conversation;
-    if (!currentConversation) {
-        await onNewConversation();
-        // The parent component will re-render with the new conversation,
-        // so this submit will be for the new one.
-        return;
-    }
-
     setIsLoading(true);
 
     const userMessageContent = input;
@@ -192,14 +174,13 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
       role: 'user',
       content: userMessageContent,
       imageUrl: userImage || undefined,
-      createdAt: new Date(),
+      createdAt: serverTimestamp(),
     };
     
-    setMessages(prev => [...prev, userMessage]);
+    onNewMessage(userMessage);
 
-
-    if (currentConversation.title === 'New Chat' && messages.length <= 1) {
-        onTitleUpdate(currentConversation.id, userMessageContent.substring(0, 30))
+    if (conversation.title === 'New Chat' && messages.length === 0) {
+        onTitleUpdate(conversation.id, userMessageContent.substring(0, 30))
     }
 
     try {
@@ -208,7 +189,7 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
         parts: m.content
       }));
 
-      const response = await getAiResponse(chatHistoryForAI.slice(1), userMessageContent, userImage || undefined);
+      const response = await getAiResponse(chatHistoryForAI, userMessageContent, userImage || undefined);
       const botMessage: Message = {
         id: `msg-${Date.now()}-bot`,
         role: 'model',
@@ -216,9 +197,9 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
         imageUrl: response.imageUrl,
         isCode: response.isCode,
         codeLanguage: response.codeLanguage,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       };
-      setMessages(prev => [...prev, botMessage]);
+      onNewMessage(botMessage);
     } catch (error) {
       console.error('Failed to get AI response:', error);
       toast({
@@ -230,11 +211,25 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
       setIsLoading(false);
     }
   };
+  
+  if (!conversation) {
+    return (
+        <div className="flex flex-1 items-center justify-center h-full">
+            <div className="text-center">
+                <h2 className="text-2xl font-semibold text-foreground">No active conversation</h2>
+                <p className="text-muted-foreground mt-2">Select a conversation or start a new one.</p>
+            </div>
+        </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full w-full">
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="space-y-8 max-w-4xl mx-auto w-full">
+            {messages.length === 0 && (
+                <div className="text-center text-muted-foreground pt-10">Start the conversation!</div>
+            )}
             {messages.map((message) => (
               <div
                 key={message.id}
