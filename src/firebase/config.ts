@@ -1,7 +1,7 @@
 
 export const firebaseConfig = {
   apiKey: "AIzaSyBwmM9O7IHzymVw6uc7j_8Ft7uY3klTp48",
-  authDomain: "chattyclone-5lnof.firebaseapp.com",
+  authDomain: "sunny-kitten-7e360d.netlify.app",
   projectId: "chattyclone-5lnof",
   storageBucket: "chattyclone-5lnof.firebasestorage.app",
   messagingSenderId: "469848693222",
