@@ -1,8 +1,9 @@
+
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "YOUR_API_KEY",
+  authDomain: "chattyclone-5lnof.firebaseapp.com",
+  projectId: "chattyclone-5lnof",
+  storageBucket: "chattyclone-5lnof.appspot.com",
+  messagingSenderId: "469848693222",
+  appId: "1:469848693222:web:a1b2c3d4e5f6g7h8i9j0k",
 };
