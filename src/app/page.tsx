@@ -3,7 +3,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,24 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
   );
 
+const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        {...props}
+    >
+        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+    </svg>
+);
+
+
 export default function Home() {
   const { data: user, isLoading } = useUser();
   const auth = useAuth();
@@ -49,10 +67,11 @@ export default function Home() {
     }
   }, [user, isLoading, router]);
 
-  const handleSignIn = async () => {
+  const handleSignIn = async (providerName: 'google' | 'github') => {
     if (!auth || !firestore) return;
     try {
-      const result = await signInWithPopup(auth, new GoogleAuthProvider());
+      const provider = providerName === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
+      const result = await signInWithPopup(auth, provider);
       const loggedInUser = result.user;
       const userRef = doc(firestore, 'users', loggedInUser.uid);
       await setDoc(userRef, {
@@ -78,13 +97,17 @@ export default function Home() {
     <main className="flex items-center justify-center h-screen bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Welcome Back!</CardTitle>
+          <CardTitle>Welcome!</CardTitle>
           <CardDescription>Sign in to continue to Philip Virtual Assistant.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button className="w-full" onClick={handleSignIn}>
+        <CardContent className="grid gap-4">
+          <Button className="w-full" onClick={() => handleSignIn('google')}>
             <GoogleIcon className="mr-2 h-4 w-4" />
             Sign in with Google
+          </Button>
+          <Button variant="outline" className="w-full" onClick={() => handleSignIn('github')}>
+            <GithubIcon className="mr-2 h-4 w-4" />
+            Sign in with GitHub
           </Button>
         </CardContent>
       </Card>
