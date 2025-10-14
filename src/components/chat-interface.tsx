@@ -107,9 +107,9 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const scrollToTop = () => {
+  const scrollToBottom = () => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = 0;
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
 
@@ -126,7 +126,7 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
   }, [conversation]);
 
   useEffect(() => {
-    scrollToTop();
+    scrollToBottom();
   }, [messages]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,20 +195,20 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
       createdAt: new Date(),
     };
     
-    setMessages(prev => [userMessage, ...prev]);
+    setMessages(prev => [...prev, userMessage]);
 
 
-    if (currentConversation.title === 'New Chat' && messages.length <= 2) {
+    if (currentConversation.title === 'New Chat' && messages.length <= 1) {
         onTitleUpdate(currentConversation.id, userMessageContent.substring(0, 30))
     }
 
     try {
-      const chatHistoryForAI = messages.map(m => ({
+      const chatHistoryForAI = [...messages, userMessage].map(m => ({
         role: m.role,
         parts: m.content
-      })).reverse();
+      }));
 
-      const response = await getAiResponse(chatHistoryForAI, userMessageContent, userImage || undefined);
+      const response = await getAiResponse(chatHistoryForAI.slice(1), userMessageContent, userImage || undefined);
       const botMessage: Message = {
         id: `msg-${Date.now()}-bot`,
         role: 'model',
@@ -218,7 +218,7 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
         codeLanguage: response.codeLanguage,
         createdAt: new Date(),
       };
-      setMessages(prev => [botMessage, ...prev]);
+      setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('Failed to get AI response:', error);
       toast({
