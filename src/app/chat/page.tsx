@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { collection, addDoc, serverTimestamp, query, orderBy, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, orderBy, getDocs, doc, setDoc, onSnapshot } from 'firebase/firestore';
 import ChatInterface from '@/components/chat-interface';
 import ChatHistory from '@/components/chat-history';
 import type { Conversation, Message as MessageType } from '@/lib/types';
@@ -21,6 +21,26 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [loadingConversations, setLoadingConversations] = useState(true);
 
+  const handleNewConversation = useCallback(async () => {
+    if (!user || !firestore) return;
+    const newConversationData: Omit<Conversation, 'id'> = {
+      title: 'New Chat',
+      createdAt: new Date(), // Use client-side date for immediate UI update
+    };
+    const conversationsRef = collection(firestore, 'users', user.uid, 'conversations');
+    
+    // Add to firestore
+    const docRef = await addDoc(conversationsRef, {
+        title: newConversationData.title,
+        createdAt: serverTimestamp() // Use server timestamp for backend
+    });
+
+    const newConvo: Conversation = { id: docRef.id, ...newConversationData };
+
+    setConversations(prev => [newConvo, ...prev]);
+    setActiveConversationId(docRef.id);
+  }, [user, firestore]);
+
   useEffect(() => {
     if (!userLoading && !user) {
       router.replace('/');
@@ -32,51 +52,46 @@ export default function ChatPage() {
       const conversationsRef = collection(firestore, 'users', user.uid, 'conversations');
       const q = query(conversationsRef, orderBy('createdAt', 'desc'));
       
-      getDocs(q).then(snapshot => {
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
         const userConversations = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         } as Conversation));
+
         setConversations(userConversations);
-        if (userConversations.length > 0) {
-          setActiveConversationId(userConversations[0].id);
-        } else {
+        
+        if (snapshot.empty) {
           // If no conversations, create a new one
-          handleNewConversation();
+          await handleNewConversation();
+        } else if (!activeConversationId && userConversations.length > 0) {
+          // If there's no active conversation set, default to the latest one
+          setActiveConversationId(userConversations[0].id);
         }
         setLoadingConversations(false);
       });
+
+      return () => unsubscribe();
     }
-  }, [user, firestore]);
+  }, [user, firestore, activeConversationId, handleNewConversation]);
 
   useEffect(() => {
     if (activeConversationId && user && firestore) {
       const messagesRef = collection(firestore, 'users', user.uid, 'conversations', activeConversationId, 'messages');
       const q = query(messagesRef, orderBy('createdAt', 'asc'));
-      getDocs(q).then(snapshot => {
+      
+      const unsubscribe = onSnapshot(q, (snapshot) => {
         const convoMessages = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         } as MessageType));
         setMessages(convoMessages);
       });
+
+      return () => unsubscribe();
     } else {
       setMessages([]);
     }
   }, [activeConversationId, user, firestore]);
-
-  const handleNewConversation = async () => {
-    if (!user || !firestore) return;
-    const newConversation: Omit<Conversation, 'id'> = {
-      title: 'New Chat',
-      createdAt: serverTimestamp(),
-    };
-    const conversationsRef = collection(firestore, 'users', user.uid, 'conversations');
-    const docRef = await addDoc(conversationsRef, newConversation);
-    const newConvo = { id: docRef.id, ...newConversation, createdAt: new Date() } as Conversation;
-    setConversations(prev => [newConvo, ...prev]);
-    setActiveConversationId(docRef.id);
-  };
   
   const handleNewMessage = (message: MessageType) => {
     if (!user || !firestore || !activeConversationId) return;
@@ -86,19 +101,16 @@ export default function ChatPage() {
     // We remove the `id` field as Firestore will generate one for us.
     const { id, ...messageData } = message;
     
-    addDoc(messagesRef, messageData).then(docRef => {
-        // Optimistically update the UI, then update with server data if needed
-        setMessages(prev => [...prev, { ...message, id: docRef.id }]);
-    });
+    addDoc(messagesRef, messageData);
+    // UI is updated optimistically via onSnapshot
   };
 
   const handleTitleUpdate = (conversationId: string, newTitle: string) => {
     if (!user || !firestore) return;
     const convoRef = doc(firestore, 'users', user.uid, 'conversations', conversationId);
     setDoc(convoRef, { title: newTitle }, { merge: true });
-    setConversations(convos => convos.map(c => c.id === conversationId ? {...c, title: newTitle} : c));
+    // UI is updated optimistically via onSnapshot
   };
-
 
   const activeConversation = conversations.find(c => c.id === activeConversationId);
 
