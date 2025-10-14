@@ -107,9 +107,9 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const scrollToBottom = () => {
+  const scrollToTop = () => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop = 0;
     }
   };
 
@@ -126,7 +126,7 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
   }, [conversation]);
 
   useEffect(() => {
-    scrollToBottom();
+    scrollToTop();
   }, [messages]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,7 +195,7 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
       createdAt: new Date(),
     };
     
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => [userMessage, ...prev]);
 
 
     if (currentConversation.title === 'New Chat' && messages.length <= 2) {
@@ -206,7 +206,7 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
       const chatHistoryForAI = messages.map(m => ({
         role: m.role,
         parts: m.content
-      }));
+      })).reverse();
 
       const response = await getAiResponse(chatHistoryForAI, userMessageContent, userImage || undefined);
       const botMessage: Message = {
@@ -218,7 +218,7 @@ export default function ChatInterface({ conversation, onNewConversation, onTitle
         codeLanguage: response.codeLanguage,
         createdAt: new Date(),
       };
-      setMessages(prev => [...prev, botMessage]);
+      setMessages(prev => [botMessage, ...prev]);
     } catch (error) {
       console.error('Failed to get AI response:', error);
       toast({
