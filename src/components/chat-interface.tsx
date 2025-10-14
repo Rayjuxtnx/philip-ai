@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef, useEffect, type FormEvent } from 'react';
-import { Paperclip, SendHorizontal, User, X, Clipboard } from 'lucide-react';
+import { Paperclip, SendHorizontal, User, X, Clipboard, Check } from 'lucide-react';
 import Image from 'next/image';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -35,33 +35,39 @@ const HoodieIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const CodeBlock = ({ language, code }: { language: string, code: string }) => {
+const CodeBlock = ({ language, code, filename }: { language: string, code: string, filename?: string }) => {
   const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
+    setCopied(true);
     toast({
       title: 'Copied to clipboard!',
     });
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="relative">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-2 right-2 h-7 w-7 text-white/50 hover:text-white"
-        onClick={handleCopy}
-      >
-        <Clipboard className="h-4 w-4" />
-      </Button>
+    <div className="rounded-md overflow-hidden bg-[#1E1E1E]">
+       <div className="flex items-center justify-between bg-gray-700/50 px-4 py-1.5 text-xs text-gray-300">
+        <span>{filename || language}</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-auto px-2 py-1 text-xs hover:bg-gray-600/50"
+          onClick={handleCopy}
+        >
+          {copied ? <Check className="h-3 w-3 mr-1" /> : <Clipboard className="h-3 w-3 mr-1" />}
+          Copy code
+        </Button>
+      </div>
       <SyntaxHighlighter
         language={language}
         style={vscDarkPlus}
         customStyle={{
           margin: 0,
-          borderRadius: '0.375rem',
-          backgroundColor: '#1E1E1E',
+          backgroundColor: 'transparent',
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-all',
         }}
@@ -79,7 +85,7 @@ const renderContent = (message: Message) => {
 
   if (message.isCode) {
     return (
-      <CodeBlock language={message.codeLanguage || 'text'} code={message.content} />
+      <CodeBlock language={message.codeLanguage || 'text'} code={message.content} filename={message.filename} />
     );
   }
 
@@ -211,6 +217,9 @@ export default function ChatInterface({ conversation, messages, onNewMessage, on
       }
       if (response.codeLanguage) {
         botMessage.codeLanguage = response.codeLanguage;
+      }
+      if (response.filename) {
+        botMessage.filename = response.filename;
       }
       if (response.imageUrl) {
         botMessage.imageUrl = response.imageUrl;

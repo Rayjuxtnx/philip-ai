@@ -7,6 +7,7 @@ export type Message = {
   imageUrl?: string;
   isCode?: boolean;
   codeLanguage?: string;
+  filename?: string;
   createdAt: FieldValue | Date;
 };
 

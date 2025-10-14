@@ -17,7 +17,7 @@ const AVAILABLE_TOOLS = {
   CODE_GENERATION: 'generateCode',
 };
 
-export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts: string }[], newMessage: string, imageUrl?: string, userName?: string): Promise<{content: string, imageUrl?: string, isCode?: boolean, codeLanguage?: string}> {
+export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts: string }[], newMessage: string, imageUrl?: string, userName?: string): Promise<{content: string, imageUrl?: string, isCode?: boolean, codeLanguage?: string, filename?: string}> {
   const userInput = newMessage;
   try {
     if (imageUrl) {
@@ -51,10 +51,11 @@ export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts
 
       case AVAILABLE_TOOLS.CODE_GENERATION:
         const codeResponse = await generateCode({ prompt: userInput });
-        const codeResult: { content: string, isCode?: boolean, codeLanguage?: string } = { content: codeResponse.code };
+        const codeResult: { content: string, isCode?: boolean, codeLanguage?: string, filename?: string } = { content: codeResponse.code };
         if (codeResponse.code) {
           codeResult.isCode = true;
           codeResult.codeLanguage = codeResponse.language;
+          codeResult.filename = codeResponse.filename;
         }
         return codeResult;
 
