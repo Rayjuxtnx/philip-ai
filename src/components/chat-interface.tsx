@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { serverTimestamp } from 'firebase/firestore';
+import type { User as FirebaseUser } from 'firebase/auth';
 
 import { getAiResponse } from '@/app/actions';
 import { Input } from '@/components/ui/input';
@@ -98,9 +99,10 @@ interface ChatInterfaceProps {
   messages: Message[];
   onNewMessage: (message: Message) => void;
   onTitleUpdate: (conversationId: string, newTitle: string) => void;
+  user: FirebaseUser | null;
 }
 
-export default function ChatInterface({ conversation, messages, onNewMessage, onTitleUpdate }: ChatInterfaceProps) {
+export default function ChatInterface({ conversation, messages, onNewMessage, onTitleUpdate, user }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -176,9 +178,9 @@ export default function ChatInterface({ conversation, messages, onNewMessage, on
         createdAt: serverTimestamp(),
       };
   
-      if (userImage) {
-        userMessage.imageUrl = userImage;
-      }
+    if (userImage) {
+      userMessage.imageUrl = userImage;
+    }
     
     onNewMessage(userMessage as Message);
 
@@ -192,15 +194,18 @@ export default function ChatInterface({ conversation, messages, onNewMessage, on
         parts: m.content
       }));
 
-      const response = await getAiResponse(chatHistoryForAI, userMessageContent, userImage || undefined);
+      const response = await getAiResponse(chatHistoryForAI, userMessageContent, userImage || undefined, user?.displayName || undefined);
       
       const botMessage: Partial<Message> = {
         id: `msg-${Date.now()}-bot`,
         role: 'model',
-        content: response.content,
         createdAt: serverTimestamp(),
       };
-
+      
+      if (response.content) {
+        botMessage.content = response.content;
+      }
+      
       if (response.isCode) {
         botMessage.isCode = response.isCode;
       }

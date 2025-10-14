@@ -17,7 +17,7 @@ const AVAILABLE_TOOLS = {
   CODE_GENERATION: 'generateCode',
 };
 
-export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts: string }[], newMessage: string, imageUrl?: string): Promise<{content: string, imageUrl?: string, isCode?: boolean, codeLanguage?: string}> {
+export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts: string }[], newMessage: string, imageUrl?: string, userName?: string): Promise<{content: string, imageUrl?: string, isCode?: boolean, codeLanguage?: string}> {
   const userInput = newMessage;
   try {
     if (imageUrl) {
@@ -34,11 +34,11 @@ export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts
 
     switch (selectedTool) {
       case AVAILABLE_TOOLS.CONVERSE:
-        const conversationResponse = await converse({ userInput, chatHistory: conversationHistory });
+        const conversationResponse = await converse({ userInput, chatHistory: conversationHistory, userName });
         return { content: conversationResponse.response };
 
       case AVAILABLE_TOOLS.QA:
-        const qaResponse = await answerGeneralKnowledgeQuestion({ question: userInput, chatHistory: conversationHistory });
+        const qaResponse = await answerGeneralKnowledgeQuestion({ question: userInput, chatHistory: conversationHistory, userName });
         return { content: qaResponse.answer };
       
       case AVAILABLE_TOOLS.GENERATE_IMAGE:

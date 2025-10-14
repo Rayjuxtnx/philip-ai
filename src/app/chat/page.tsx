@@ -143,6 +143,7 @@ export default function ChatPage() {
           messages={messages}
           onNewMessage={handleNewMessage}
           onTitleUpdate={handleTitleUpdate}
+          user={user}
         />
       </SidebarInset>
     </SidebarProvider>

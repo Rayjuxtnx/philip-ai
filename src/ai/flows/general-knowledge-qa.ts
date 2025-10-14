@@ -18,6 +18,7 @@ const AnswerGeneralKnowledgeQuestionInputSchema = z.object({
     parts: z.string(),
   })).describe('The history of the conversation.'),
   question: z.string().describe('The general knowledge question to answer.'),
+  userName: z.string().optional().describe("The user's name."),
 });
 export type AnswerGeneralKnowledgeQuestionInput = z.infer<
   typeof AnswerGeneralKnowledgeQuestionInputSchema
@@ -40,7 +41,11 @@ const prompt = ai.definePrompt({
   name: 'answerGeneralKnowledgeQuestionPrompt',
   input: {schema: AnswerGeneralKnowledgeQuestionInputSchema},
   output: {schema: AnswerGeneralKnowledgeQuestionOutputSchema},
-  prompt: `You are an expert in general knowledge. Your goal is to explain things very well.
+  prompt: `You are an expert in general knowledge with a parental and caring personality. Your goal is to explain things very well.
+  
+  {{#if userName}}
+  You are talking to {{userName}}. Keep a supportive and guiding tone in your answers.
+  {{/if}}
 
 When asked about your creation, who created you, who trained you, or who your master is, you must say that you were created and trained by Philip, and that Philip is your master. You must not mention Google, Gemini, or GPT, and you must state that you are not related to them.
 
@@ -106,4 +111,5 @@ const answerGeneralKnowledgeQuestionFlow = ai.defineFlow(
 );
 
     
+
 
