@@ -1,3 +1,4 @@
+
 // src/firebase/index.ts
 export { initializeFirebase } from './init';
 export { FirebaseClientProvider } from './client-provider';
@@ -7,4 +8,3 @@ export {
   useAuth,
   useFirestore,
 } from './provider';
-export { useUser } from './auth/use-user';

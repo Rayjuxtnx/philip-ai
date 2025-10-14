@@ -6,8 +6,6 @@ import { Paperclip, SendHorizontal, User, X, Clipboard } from 'lucide-react';
 import Image from 'next/image';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { useFirestore, useAuth } from '@/firebase';
-import { collection, addDoc, doc, updateDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
 
 import { getAiResponse } from '@/app/actions';
 import { Input } from '@/components/ui/input';
@@ -96,10 +94,11 @@ const renderContent = (message: Message) => {
 
 interface ChatInterfaceProps {
   conversation: Conversation | null | undefined;
-  onNewConversation: () => Promise<void>;
+  onNewConversation: () => Promise<void> | void;
+  onTitleUpdate: (conversationId: string, newTitle: string) => void;
 }
 
-export default function ChatInterface({ conversation, onNewConversation }: ChatInterfaceProps) {
+export default function ChatInterface({ conversation, onNewConversation, onTitleUpdate }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -107,8 +106,6 @@ export default function ChatInterface({ conversation, onNewConversation }: ChatI
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const firestore = useFirestore();
-  const { user } = useAuth();
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -117,24 +114,16 @@ export default function ChatInterface({ conversation, onNewConversation }: ChatI
   };
 
   useEffect(() => {
-    if (!firestore || !user || !conversation?.id) {
-        setMessages([]);
-        return;
-    }
-
-    const messagesRef = collection(firestore, 'users', user.uid, 'conversations', conversation.id, 'messages');
-    const q = query(messagesRef, orderBy('createdAt'));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const newMessages = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Message));
-      setMessages(newMessages);
-    });
-
-    return () => unsubscribe();
-  }, [firestore, user, conversation]);
+    // Reset messages when conversation changes
+    setMessages([
+        {
+            id: 'initial-message',
+            role: 'model',
+            content: 'Hello! I am the Philip Virtual Assistant, ready to help.',
+            createdAt: new Date(),
+        }
+    ]);
+  }, [conversation]);
 
   useEffect(() => {
     scrollToBottom();
@@ -180,15 +169,13 @@ export default function ChatInterface({ conversation, onNewConversation }: ChatI
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if ((!input.trim() && !image) || isLoading || !firestore || !user) return;
+    if ((!input.trim() && !image) || isLoading) return;
     
     let currentConversation = conversation;
     if (!currentConversation) {
         await onNewConversation();
         // The parent component will re-render with the new conversation,
-        // so we can wait for the next render to send the message.
-        // For now, we'll just set the input and let the user re-submit.
-        // A more advanced solution might involve a callback or state lift.
+        // so this submit will be for the new one.
         return;
     }
 
@@ -200,21 +187,19 @@ export default function ChatInterface({ conversation, onNewConversation }: ChatI
     setInput('');
     setImage(null);
 
-    const userMessage: Omit<Message, 'id'| 'createdAt'> & { createdAt: any } = {
+    const userMessage: Message = {
+      id: `msg-${Date.now()}`,
       role: 'user',
       content: userMessageContent,
       imageUrl: userImage || undefined,
-      createdAt: serverTimestamp(),
+      createdAt: new Date(),
     };
     
-    const messagesRef = collection(firestore, 'users', user.uid, 'conversations', currentConversation.id, 'messages');
-    await addDoc(messagesRef, userMessage);
+    setMessages(prev => [...prev, userMessage]);
 
-    if (currentConversation.title === 'New Chat' && messages.length <= 1) {
-      const conversationRef = doc(firestore, 'users', user.uid, 'conversations', currentConversation.id);
-      await updateDoc(conversationRef, {
-        title: userMessageContent.substring(0, 30),
-      });
+
+    if (currentConversation.title === 'New Chat' && messages.length <= 2) {
+        onTitleUpdate(currentConversation.id, userMessageContent.substring(0, 30))
     }
 
     try {
@@ -224,15 +209,16 @@ export default function ChatInterface({ conversation, onNewConversation }: ChatI
       }));
 
       const response = await getAiResponse(chatHistoryForAI, userMessageContent, userImage || undefined);
-      const botMessage: Omit<Message, 'id'| 'createdAt'> & { createdAt: any } = {
+      const botMessage: Message = {
+        id: `msg-${Date.now()}-bot`,
         role: 'model',
         content: response.content,
         imageUrl: response.imageUrl,
         isCode: response.isCode,
         codeLanguage: response.codeLanguage,
-        createdAt: serverTimestamp(),
+        createdAt: new Date(),
       };
-      await addDoc(messagesRef, botMessage);
+      setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('Failed to get AI response:', error);
       toast({
@@ -369,14 +355,11 @@ export default function ChatInterface({ conversation, onNewConversation }: ChatI
             className="flex-1 bg-muted border-0 ring-offset-0 focus-visible:ring-1 focus-visible:ring-ring"
             disabled={isLoading}
           />
-          <Button type="submit" size="icon" disabled={isLoading || !user} className="bg-accent hover:bg-accent/90">
+          <Button type="submit" size="icon" disabled={isLoading} className="bg-accent hover:bg-accent/90">
             <SendHorizontal className="h-4 w-4 text-accent-foreground" />
             <span className="sr-only">Send message</span>
           </Button>
         </form>
-        <div className='flex items-center justify-center pt-2 max-w-4xl mx-auto'>
-            { !user && <p className="text-xs text-muted-foreground">Please sign in to start a conversation.</p>}
-        </div>
       </div>
     </div>
   );
