@@ -43,7 +43,11 @@ export async function getAiResponse(chatHistory: { role: 'user' | 'model', parts
       
       case AVAILABLE_TOOLS.GENERATE_IMAGE:
         const imageResponse = await generateImage({ prompt: userInput });
-        return { content: `Here is the image you asked for.`, imageUrl: imageResponse.imageUrl };
+        const response: { content: string, imageUrl?: string } = { content: `Here is the image you asked for.`};
+        if (imageResponse.imageUrl) {
+          response.imageUrl = imageResponse.imageUrl;
+        }
+        return response;
 
       case AVAILABLE_TOOLS.CODE_GENERATION:
         const codeResponse = await generateCode({ prompt: userInput });

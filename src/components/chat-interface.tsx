@@ -170,12 +170,15 @@ export default function ChatInterface({ conversation, messages, onNewMessage, on
     setImage(null);
 
     const userMessage: Message = {
-      id: `msg-${Date.now()}`,
-      role: 'user',
-      content: userMessageContent,
-      imageUrl: userImage || undefined,
-      createdAt: serverTimestamp(),
-    };
+        id: `msg-${Date.now()}`,
+        role: 'user',
+        content: userMessageContent,
+        createdAt: serverTimestamp(),
+      };
+  
+      if (userImage) {
+        userMessage.imageUrl = userImage;
+      }
     
     onNewMessage(userMessage);
 
@@ -190,15 +193,20 @@ export default function ChatInterface({ conversation, messages, onNewMessage, on
       }));
 
       const response = await getAiResponse(chatHistoryForAI, userMessageContent, userImage || undefined);
+      
       const botMessage: Message = {
         id: `msg-${Date.now()}-bot`,
         role: 'model',
         content: response.content,
-        imageUrl: response.imageUrl,
         isCode: response.isCode,
         codeLanguage: response.codeLanguage,
         createdAt: serverTimestamp(),
       };
+
+      if (response.imageUrl) {
+        botMessage.imageUrl = response.imageUrl;
+      }
+
       onNewMessage(botMessage);
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -216,8 +224,8 @@ export default function ChatInterface({ conversation, messages, onNewMessage, on
     return (
         <div className="flex flex-1 items-center justify-center h-full">
             <div className="text-center">
-                <h2 className="text-2xl font-semibold text-foreground">No active conversation</h2>
-                <p className="text-muted-foreground mt-2">Select a conversation or start a new one.</p>
+                <h2 className="text-2xl font-semibold text-foreground">Select a conversation</h2>
+                <p className="text-muted-foreground mt-2">Choose from an existing conversation or start a new one.</p>
             </div>
         </div>
     );
