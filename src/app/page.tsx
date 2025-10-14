@@ -3,7 +3,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, GithubAuthProvider, type FirebaseError } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
@@ -81,7 +81,10 @@ export default function Home() {
         lastLogin: serverTimestamp()
       }, { merge: true });
     } catch (error) {
-      console.error('Authentication error:', error);
+      const firebaseError = error as FirebaseError;
+      if (firebaseError.code !== 'auth/cancelled-popup-request') {
+        console.error('Authentication error:', error);
+      }
     }
   };
 
