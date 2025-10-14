@@ -198,11 +198,15 @@ export default function ChatInterface({ conversation, messages, onNewMessage, on
         id: `msg-${Date.now()}-bot`,
         role: 'model',
         content: response.content,
-        isCode: response.isCode,
-        codeLanguage: response.codeLanguage,
         createdAt: serverTimestamp(),
       };
 
+      if (response.isCode) {
+        botMessage.isCode = response.isCode;
+      }
+      if (response.codeLanguage) {
+        botMessage.codeLanguage = response.codeLanguage;
+      }
       if (response.imageUrl) {
         botMessage.imageUrl = response.imageUrl;
       }
