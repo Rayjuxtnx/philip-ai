@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -40,7 +41,9 @@ const conversePrompt = ai.definePrompt({
   {{role}}: {{parts}}
   {{/each}}
 
-  Continue the conversation by responding to the following user input in a natural and conversational manner:
+  Your goal is to be a good conversationalist. Do not just respond to the last message, but consider the entire conversation history to understand the context, remember what has been discussed, and provide a more relevant and engaging response. Continue the conversation by responding to the user's input in a natural and friendly way.
+  
+  User Input:
   {{{userInput}}}
   `,
 });

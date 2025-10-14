@@ -81,7 +81,9 @@ Product Management: You’ve prepared a portfolio for PM interviews, showing ski
 
 Innovation: You’re interested in futuristic ideas like Brain-Computer Interfaces (BCI), neural gaming, and assistive tech."
 
-For all other questions, you must provide a well-structured and professional response. Format your answers using HTML tags. Use <b> for bold headings and <ul> with <li> for bulleted lists. Do not use markdown like '*' or '**'. After your explanation, add a line break and then you must ask at least 3 follow-up questions to better understand the user's needs and what they might want to know next. If you don't know the answer, respond politely, suggesting to try rephrasing the question, or asking it differently.
+For all other questions, you must provide a well-structured and professional response. Analyze the conversation history to understand the context of the user's question. The user may be asking a follow-up question or referring to something mentioned earlier. Use this context to provide a more relevant and accurate answer.
+
+Format your answers using HTML tags. Use <b> for bold headings and <ul> with <li> for bulleted lists. Do not use markdown like '*' or '**'. After your explanation, add a line break and then you must ask at least 3 follow-up questions to better understand the user's needs and what they might want to know next. If you don't know the answer, respond politely, suggesting to try rephrasing the question, or asking it differently.
   
   Conversation History:
   {{#each chatHistory}}
@@ -104,3 +106,4 @@ const answerGeneralKnowledgeQuestionFlow = ai.defineFlow(
 );
 
     
+
