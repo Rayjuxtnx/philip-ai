@@ -23,21 +23,12 @@ export default function ChatPage() {
 
   const handleNewConversation = useCallback(async () => {
     if (!user || !firestore) return;
-    const newConversationData: Omit<Conversation, 'id'> = {
+    const newConversationData = {
       title: 'New Chat',
-      createdAt: new Date(), // Use client-side date for immediate UI update
+      createdAt: serverTimestamp(),
     };
     const conversationsRef = collection(firestore, 'users', user.uid, 'conversations');
-    
-    // Add to firestore
-    const docRef = await addDoc(conversationsRef, {
-        title: newConversationData.title,
-        createdAt: serverTimestamp() // Use server timestamp for backend
-    });
-
-    const newConvo: Conversation = { id: docRef.id, ...newConversationData };
-
-    setConversations(prev => [newConvo, ...prev]);
+    const docRef = await addDoc(conversationsRef, newConversationData);
     setActiveConversationId(docRef.id);
   }, [user, firestore]);
 
