@@ -1,5 +1,5 @@
 // src/firebase/config.ts
-import 'dotenv/config';
+require('dotenv').config({ path: '.env' });
 
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
